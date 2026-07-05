@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
@@ -26,6 +27,7 @@ function LayoutComponent() {
 function Gate() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -50,6 +52,58 @@ function Gate() {
       active = false;
     };
   }, [user?.id, user?.is_anonymous, loading, router]);
+
+  useEffect(() => {
+    if (!user || user.is_anonymous) return;
+
+    const channel = supabase
+      .channel(`finance-sync:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "transactions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => void queryClient.invalidateQueries(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "subscriptions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => void queryClient.invalidateQueries(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_settings",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => void queryClient.invalidateQueries(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "daily_snapshots",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => void queryClient.invalidateQueries(),
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient, user]);
 
   if (!ready) {
     return (
