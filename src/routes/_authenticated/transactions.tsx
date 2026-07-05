@@ -93,6 +93,14 @@ function TxLog() {
                 <Button
                   size="icon"
                   variant="ghost"
+                  onClick={() => setEditing(t as EditableTx)}
+                  aria-label="Edit"
+                >
+                  <Pencil className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
                   onClick={() => del(t.id, t.payment_method, Number(t.amount), t.adjust_account)}
                   aria-label="Delete"
                 >
@@ -103,6 +111,11 @@ function TxLog() {
           </ul>
         )}
       </Card>
+      <EditTransactionDialog
+        tx={editing}
+        open={editing !== null}
+        onOpenChange={(o) => !o && setEditing(null)}
+      />
     </div>
   );
 }
