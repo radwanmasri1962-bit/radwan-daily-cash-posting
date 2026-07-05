@@ -5,7 +5,8 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { settingsQO } from "@/lib/queries";
-import { CATEGORIES, PAYMENT_METHODS, ACCOUNTS, type PaymentMethod } from "@/lib/constants";
+import { PAYMENT_METHODS, ACCOUNTS, type PaymentMethod } from "@/lib/constants";
+import { CategoryPicker } from "@/components/CategoryPicker";
 import { applyDelta } from "@/lib/apply-transaction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -169,14 +170,7 @@ function AddTx() {
         </div>
         <div>
           <Label>Category</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent className="max-h-72">
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <CategoryPicker value={category} onChange={setCategory} />
         </div>
         <div>
           <Label>Notes</Label>
