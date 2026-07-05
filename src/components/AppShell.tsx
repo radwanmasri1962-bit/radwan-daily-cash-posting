@@ -1,63 +1,119 @@
 import { Link } from "@tanstack/react-router";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  LayoutDashboard,
+  PlusCircle,
+  CalendarCheck,
+  ListOrdered,
+  Repeat,
+  BarChart3,
+  Settings as SettingsIcon,
+  Wallet,
+} from "lucide-react";
 import { toggleTheme, isDark } from "@/lib/theme";
-import { useState, useEffect } from "react";
 
 const NAV = [
-  { to: "/", label: "Dashboard" },
-  { to: "/add", label: "Add" },
-  { to: "/checkin", label: "Check-In" },
-  { to: "/transactions", label: "Log" },
-  { to: "/accounts", label: "Accounts" },
-  { to: "/subscriptions", label: "Subs" },
-  { to: "/reports", label: "Reports" },
-  { to: "/settings", label: "Settings" },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/add", label: "Add Transaction", icon: PlusCircle },
+  { to: "/checkin", label: "Daily Check-In", icon: CalendarCheck },
+  { to: "/transactions", label: "Transactions", icon: ListOrdered },
+  { to: "/subscriptions", label: "Subscriptions", icon: Repeat },
+  { to: "/reports", label: "Reports", icon: BarChart3 },
+  { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(false);
   useEffect(() => setDark(isDark()), []);
 
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3">
-          <Link to="/" className="text-lg font-bold tracking-tight">
-            Daily Cash <span className="text-primary">Position</span>
-          </Link>
-          <div className="flex items-center gap-1">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => {
-                toggleTheme();
-                setDark(isDark());
-              }}
-              aria-label="Toggle theme"
+      {/* Sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border/60 bg-sidebar px-3 py-5 md:flex">
+        <Link to="/" className="mb-8 flex items-center gap-2 px-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+            <Wallet className="h-4 w-4 text-foreground" />
+          </div>
+          <div className="leading-tight">
+            <div className="text-sm font-semibold">Daily Cash Position</div>
+            <div className="text-[10px] text-muted-foreground">Financial Snapshot</div>
+          </div>
+        </Link>
+        <nav className="flex flex-col gap-1">
+          {NAV.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              activeOptions={{ exact: true }}
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-foreground"
             >
-              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-          </div>
-        </div>
+              <n.icon className="h-4 w-4" />
+              <span>{n.label}</span>
+            </Link>
+          ))}
+        </nav>
+      </aside>
 
-        <nav className="mx-auto max-w-5xl overflow-x-auto px-2 pb-2">
-          <div className="flex gap-1 whitespace-nowrap">
-            {NAV.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                activeOptions={{ exact: true }}
-                className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[status=active]:bg-primary data-[status=active]:text-primary-foreground"
-              >
-                {n.label}
-              </Link>
-            ))}
-          </div>
+      {/* Mobile top nav */}
+      <header className="sticky top-0 z-20 border-b border-border/60 bg-background/95 backdrop-blur md:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link to="/" className="text-sm font-semibold">
+            Daily Cash Position
+          </Link>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => {
+              toggleTheme();
+              setDark(isDark());
+            }}
+            aria-label="Toggle theme"
+          >
+            {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+        </div>
+        <nav className="flex gap-1 overflow-x-auto whitespace-nowrap px-2 pb-2">
+          {NAV.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              activeOptions={{ exact: true }}
+              className="rounded-full px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-foreground"
+            >
+              {n.label}
+            </Link>
+          ))}
         </nav>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-4 pb-24">{children}</main>
+
+      {/* Main */}
+      <div className="md:pl-60">
+        <div className="hidden items-center justify-between border-b border-border/60 px-8 py-4 md:flex">
+          <div className="text-sm text-muted-foreground">{today}</div>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => {
+              toggleTheme();
+              setDark(isDark());
+            }}
+            aria-label="Toggle theme"
+          >
+            {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+        </div>
+        <main className="px-4 py-6 md:px-8 md:py-8">{children}</main>
+      </div>
     </div>
   );
 }

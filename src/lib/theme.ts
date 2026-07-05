@@ -1,7 +1,8 @@
 export function initTheme() {
   if (typeof window === "undefined") return;
   const saved = localStorage.getItem("dcp-theme");
-  const dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // Default to dark for the premium look; respect explicit user override.
+  const dark = saved ? saved === "dark" : true;
   document.documentElement.classList.toggle("dark", dark);
 }
 
