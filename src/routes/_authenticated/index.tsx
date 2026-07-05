@@ -33,6 +33,7 @@ function Dashboard() {
   const { data: s } = useSuspenseQuery(settingsQO(user!.id));
   const { data: txs } = useSuspenseQuery(txQO(user!.id, 8));
   const { data: subs } = useSuspenseQuery(subsQO(user!.id));
+  const [selected, setSelected] = useState<EditableTx | null>(null);
 
   const cap1Available = Number(s.cap1_limit) - Number(s.cap1_owed);
   const utilization =
