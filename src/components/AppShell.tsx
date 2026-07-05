@@ -39,8 +39,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-
+          </div>
         </div>
+
         <nav className="mx-auto max-w-5xl overflow-x-auto px-2 pb-2">
           <div className="flex gap-1 whitespace-nowrap">
             {NAV.map((n) => (
