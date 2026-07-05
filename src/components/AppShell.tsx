@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +12,11 @@ import {
   BarChart3,
   Settings as SettingsIcon,
   Wallet,
+  LogOut,
 } from "lucide-react";
 import { toggleTheme, isDark } from "@/lib/theme";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -27,6 +30,8 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(false);
+  const router = useRouter();
+  const { user } = useAuth();
   useEffect(() => setDark(isDark()), []);
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -35,6 +40,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     day: "numeric",
     year: "numeric",
   });
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    router.navigate({ to: "/auth", replace: true });
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -62,6 +72,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
+        <div className="mt-auto border-t border-border/60 pt-3">
+          {user?.email ? (
+            <div className="mb-2 truncate px-3 text-[11px] text-muted-foreground">
+              {user.email}
+            </div>
+          ) : null}
+          <button
+            onClick={signOut}
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Sign out</span>
+          </button>
+        </div>
       </aside>
 
       {/* Mobile top nav */}
