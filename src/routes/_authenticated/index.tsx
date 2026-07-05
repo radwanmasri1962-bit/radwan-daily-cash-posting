@@ -120,44 +120,81 @@ function Dashboard() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <tr className="border-b border-border/60">
-                    <th className="px-5 py-3 font-medium">Date</th>
-                    <th className="px-5 py-3 font-medium">Description</th>
-                    <th className="px-5 py-3 font-medium">Category</th>
-                    <th className="px-5 py-3 font-medium">Account</th>
-                    <th className="px-5 py-3 text-right font-medium">Amount</th>
-                    <th className="px-5 py-3 font-medium">Merchant</th>
-                    <th className="px-5 py-3 font-medium">Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {txs.map((t) => {
-                    const isIncome = t.payment_method === "Income to Chase";
-                    return (
-                      <tr key={t.id} className="border-b border-border/40 last:border-0">
-                        <td className="px-5 py-4 text-muted-foreground">{t.tx_date}</td>
-                        <td className="px-5 py-4 font-medium">
-                          {t.description || t.category}
-                        </td>
-                        <td className="px-5 py-4 text-muted-foreground">{t.category}</td>
-                        <td className="px-5 py-4 text-muted-foreground">{t.payment_method}</td>
-                        <td
-                          className={`px-5 py-4 text-right font-semibold tabular-nums ${
-                            isIncome ? "text-emerald-500" : "text-foreground"
-                          }`}
+            <TooltipProvider delayDuration={300}>
+              <div className="overflow-x-auto">
+                <table className="w-full table-fixed text-sm">
+                  <colgroup>
+                    <col className="w-28" />
+                    <col />
+                    <col className="w-40" />
+                    <col className="w-40" />
+                    <col />
+                    <col className="w-32" />
+                  </colgroup>
+                  <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr className="border-b border-border/60">
+                      <th className="px-5 py-3 font-medium">Date</th>
+                      <th className="px-5 py-3 font-medium">Description</th>
+                      <th className="px-5 py-3 font-medium">Category</th>
+                      <th className="px-5 py-3 font-medium">Account</th>
+                      <th className="px-5 py-3 text-right font-medium">Amount</th>
+                      <th className="px-5 py-3 font-medium">Merchant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {txs.map((t) => {
+                      const kind = amountKind(t.payment_method);
+                      const amtClass =
+                        kind === "income"
+                          ? "text-emerald-500"
+                          : kind === "expense"
+                            ? "text-rose-500"
+                            : "text-foreground";
+                      const sign = kind === "income" ? "+" : kind === "expense" ? "−" : "";
+                      return (
+                        <tr
+                          key={t.id}
+                          onClick={() => setSelected(t as EditableTx)}
+                          className="cursor-pointer border-b border-border/40 transition-colors last:border-0 hover:bg-muted/30"
                         >
-                          {isIncome ? "+" : "−"}
-                          {money(t.amount)}
-                        </td>
-                        <td className="px-5 py-4 text-muted-foreground">{t.merchant ?? "—"}</td>
-                        <td className="px-5 py-4 text-muted-foreground">{t.notes ?? "—"}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
+                          <td className="whitespace-nowrap px-5 py-5 text-muted-foreground">
+                            {t.tx_date}
+                          </td>
+                          <td className="px-5 py-5 font-medium">
+                            <TruncCell text={t.description || t.category || "—"} />
+                          </td>
+                          <td className="whitespace-nowrap px-5 py-5 text-muted-foreground">
+                            <TruncCell text={t.category || "—"} muted />
+                          </td>
+                          <td className="whitespace-nowrap px-5 py-5 text-muted-foreground">
+                            {t.payment_method}
+                          </td>
+                          <td
+                            className={`whitespace-nowrap px-5 py-5 text-right font-semibold tabular-nums ${amtClass}`}
+                          >
+                            {sign}
+                            {money(t.amount)}
+                          </td>
+                          <td className="px-5 py-5 text-muted-foreground">
+                            <TruncCell text={t.merchant || "—"} muted />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </TooltipProvider>
+          )}
+        </Card>
+      </section>
+
+      <TransactionDetailsDialog
+        tx={selected}
+        open={selected !== null}
+        onOpenChange={(o) => !o && setSelected(null)}
+      />
+
               </table>
             </div>
           )}
