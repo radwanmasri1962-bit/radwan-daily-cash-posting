@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Wallet className="h-4 w-4 text-foreground" />
           </div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold">Daily Cash Position</div>
+            <div className="text-sm font-semibold">Radwan Daily Cash Position</div>
             <div className="text-[10px] text-muted-foreground">Financial Snapshot</div>
           </div>
         </Link>
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 border-b border-border/60 bg-background/95 backdrop-blur md:hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <Link to="/" className="text-sm font-semibold">
-            Daily Cash Position
+            Radwan Daily Cash Position
           </Link>
           <div className="flex items-center gap-1">
             <Button

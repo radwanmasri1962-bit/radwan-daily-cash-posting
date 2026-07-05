@@ -59,3 +59,27 @@ export const snapshotsQO = (userId: string) =>
       return data ?? [];
     },
   });
+
+export interface CategoryRow {
+  id: string;
+  user_id: string;
+  name: string;
+  is_favorite: boolean;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export const categoriesQO = (userId: string) =>
+  queryOptions({
+    queryKey: ["categories", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("user_id", userId)
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as CategoryRow[];
+    },
+  });

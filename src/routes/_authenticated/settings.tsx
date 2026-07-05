@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { CategoriesManager } from "@/components/CategoriesManager";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -130,6 +131,8 @@ function SettingsPage() {
           Confirm This Month's Deposit
         </Button>
       </Card>
+
+      <CategoriesManager />
 
       <Card className="p-5">
         <h2 className="font-semibold">About</h2>
