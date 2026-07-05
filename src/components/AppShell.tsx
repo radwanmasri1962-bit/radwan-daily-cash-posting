@@ -94,17 +94,22 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/" className="text-sm font-semibold">
             Daily Cash Position
           </Link>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => {
-              toggleTheme();
-              setDark(isDark());
-            }}
-            aria-label="Toggle theme"
-          >
-            {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => {
+                toggleTheme();
+                setDark(isDark());
+              }}
+              aria-label="Toggle theme"
+            >
+              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button size="icon" variant="ghost" onClick={signOut} aria-label="Sign out">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto whitespace-nowrap px-2 pb-2">
           {NAV.map((n) => (
