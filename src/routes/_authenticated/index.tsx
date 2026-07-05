@@ -195,12 +195,6 @@ function Dashboard() {
         onOpenChange={(o) => !o && setSelected(null)}
       />
 
-              </table>
-            </div>
-          )}
-        </Card>
-      </section>
-
       {/* Subscription Calendar */}
       <SubscriptionCalendar
         subs={subs.map((x) => ({
