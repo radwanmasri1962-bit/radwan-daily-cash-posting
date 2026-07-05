@@ -82,7 +82,7 @@ function AuthPage() {
             <Wallet className="h-4 w-4" />
           </div>
           <div>
-            <div className="text-sm font-semibold">Daily Cash Position</div>
+            <div className="text-sm font-semibold">Radwan Daily Cash Position</div>
             <div className="text-[11px] text-muted-foreground">
               Sign in to sync across devices
             </div>
