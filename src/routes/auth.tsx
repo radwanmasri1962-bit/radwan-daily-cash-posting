@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Wallet } from "lucide-react";
+import type { Session } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -22,11 +23,20 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.navigate({ to: "/" });
-    });
+    function handleSession(session: Session | null) {
+      if (!session) return;
+      if (session.user.is_anonymous) {
+        setTimeout(() => {
+          void supabase.auth.signOut();
+        }, 0);
+        return;
+      }
+      void router.navigate({ to: "/" });
+    }
+
+    supabase.auth.getSession().then(({ data }) => handleSession(data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      if (s) router.navigate({ to: "/" });
+      handleSession(s);
     });
     return () => sub.subscription.unsubscribe();
   }, [router]);
