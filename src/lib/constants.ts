@@ -39,8 +39,8 @@ export const DEFAULT_SUBSCRIPTIONS = [
 
 export const DEFAULT_SETTINGS = {
   chase_balance: 0,
-  cap1_owed: 2213.71,
-  cap1_limit: 3650.0,
+  cap1_owed: 0,
+  cap1_limit: 0,
   cap1_min_payment: 0,
   cap1_due_day: 1,
   cash_balance: 0,
