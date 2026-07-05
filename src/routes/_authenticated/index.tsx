@@ -287,6 +287,19 @@ function Meta({ label, value }: { label: string; value: string }) {
   );
 }
 
+function TruncCell({ text, muted }: { text: string; muted?: boolean }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className={`truncate ${muted ? "text-muted-foreground" : ""}`}>{text}</div>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs break-words">
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function amountColor(n: number) {
   if (n > 0) return "text-emerald-500";
   if (n < 0) return "text-rose-500";
