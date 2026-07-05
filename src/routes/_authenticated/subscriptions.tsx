@@ -218,7 +218,7 @@ function SubDialog({
           </div>
           <div>
             <Label>Notes</Label>
-            <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <Input value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
           <Button onClick={save} className="w-full">Save</Button>
         </div>
