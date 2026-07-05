@@ -24,6 +24,7 @@ function TxLog() {
   const { data: s } = useSuspenseQuery(settingsQO(user!.id));
   const qc = useQueryClient();
   const [q, setQ] = useState("");
+  const [editing, setEditing] = useState<EditableTx | null>(null);
 
   const filtered = txs.filter((t) => {
     if (!q) return true;
