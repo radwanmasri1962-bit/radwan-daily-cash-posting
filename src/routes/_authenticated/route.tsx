@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
@@ -7,10 +7,6 @@ import { ensureSeeded } from "@/lib/seed";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
-  },
   component: LayoutComponent,
 });
 
@@ -24,17 +20,21 @@ function LayoutComponent() {
 
 function Gate() {
   const { user, loading } = useAuth();
-  const router = useRouter();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (loading) return;
-    if (!user) {
-      router.navigate({ to: "/auth", replace: true });
-      return;
-    }
-    ensureSeeded(user.id).then(() => setReady(true));
-  }, [user, loading, router]);
+    (async () => {
+      let uid = user?.id;
+      if (!uid) {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error || !data.user) return;
+        uid = data.user.id;
+      }
+      await ensureSeeded(uid);
+      setReady(true);
+    })();
+  }, [user, loading]);
 
   if (!ready) {
     return (

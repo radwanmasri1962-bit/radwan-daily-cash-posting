@@ -1,8 +1,7 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, LogOut } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { toggleTheme, isDark } from "@/lib/theme";
 import { useState, useEffect } from "react";
 
@@ -18,14 +17,8 @@ const NAV = [
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const [dark, setDark] = useState(false);
   useEffect(() => setDark(isDark()), []);
-
-  async function signOut() {
-    await supabase.auth.signOut();
-    router.navigate({ to: "/auth", replace: true });
-  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -46,11 +39,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Button size="icon" variant="ghost" onClick={signOut} aria-label="Sign out">
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
         </div>
+
         <nav className="mx-auto max-w-5xl overflow-x-auto px-2 pb-2">
           <div className="flex gap-1 whitespace-nowrap">
             {NAV.map((n) => (
