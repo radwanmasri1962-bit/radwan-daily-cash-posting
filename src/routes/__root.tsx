@@ -86,6 +86,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Simple manual-entry daily cash tracker for personal finances." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Daily Cash Position" },
+      { name: "twitter:description", content: "Simple manual-entry daily cash tracker for personal finances." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5c5a1c65-d512-4ef3-a86b-304f5e6a3e86/id-preview-ced98fed--5e0cf97f-0343-4732-bfbd-463924a5a9c3.lovable.app-1783273716720.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5c5a1c65-d512-4ef3-a86b-304f5e6a3e86/id-preview-ced98fed--5e0cf97f-0343-4732-bfbd-463924a5a9c3.lovable.app-1783273716720.png" },
     ],
     links: [
       {
