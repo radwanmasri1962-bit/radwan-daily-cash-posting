@@ -104,7 +104,7 @@ function Subs() {
                 </div>
               </div>
               <div className="mt-3 flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => markPaid(s.id, s.last_paid_ym)}>
+                <Button size="sm" variant="outline" onClick={() => markPaid(s.id, s.last_paid_ym ?? "")}>
                   <Check className="mr-1 h-3 w-3" />
                   {paidThisMonth ? "Unmark" : "Mark paid"}
                 </Button>
