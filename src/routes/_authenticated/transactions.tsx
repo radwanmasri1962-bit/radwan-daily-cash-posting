@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { money } from "@/lib/format";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+import { EditTransactionDialog, type EditableTx } from "@/components/EditTransactionDialog";
 
 export const Route = createFileRoute("/_authenticated/transactions")({
   component: TxLog,
