@@ -1,12 +1,23 @@
-export const CATEGORIES = [
-  "Rent", "Utilities", "Electricity", "Water", "Gas Utility", "Internet", "Phone",
-  "Groceries", "Restaurants", "Coffee", "Gasoline", "Car Payment", "Car Insurance",
-  "Car Maintenance", "Parking", "Uber / Taxi", "Health", "Pharmacy", "Doctor",
-  "Dental", "Gym", "Clothing", "Laundry", "Household Supplies", "Personal Care",
-  "Software & AI", "Subscriptions", "Entertainment", "Streaming", "Travel",
-  "Family", "Gifts", "Business", "JARA AI", "Bank Fees", "Credit Card Payment",
-  "Cash Withdrawal", "SNAP Food", "Miscellaneous",
+// Default seed list used only when creating a new account.
+// After sign-up, categories are user-owned rows in the `categories` table
+// (add / rename / archive / favorite via Settings).
+export const DEFAULT_CATEGORIES = [
+  "Alcohol", "Amazon", "Bank Fees", "Beverages", "Business", "Business Income",
+  "Cannabis", "Car Insurance", "Car Maintenance", "Car Payment", "Car Registration", "Car Wash",
+  "Cash Deposit", "Cash Withdrawal", "Charity", "Child Expenses", "Cigarettes", "Cleaning Supplies",
+  "Clothing", "Coffee", "Credit Card Payment", "Debt Payment", "Dental", "Dining Out", "Doctor",
+  "Electricity", "Electronics", "Entertainment", "Family", "Fast Food", "Freelance", "Furniture",
+  "Gas Utility", "Gasoline", "General Shopping", "Gift Received", "Gifts", "Gifts Given", "Groceries",
+  "Gym", "Health", "Household Items", "Household Supplies", "Interest Charges", "Interest Income",
+  "Internet", "JARA AI", "Laundry", "Loan Payment", "Marketing", "Miscellaneous", "Office Supplies",
+  "Other Income", "Parking", "Personal Care", "Pharmacy", "Prescriptions", "Professional Services",
+  "Refund", "Rent", "Restaurants", "Ride Share (Uber/Lyft)", "Salary", "SNAP Food", "Snacks",
+  "Software & AI", "Streaming", "Subscriptions", "Tolls", "Transfer Between Accounts", "Travel",
+  "Uber / Taxi", "Utilities", "Vape / Tobacco", "Vitamins & Supplements", "Water",
 ] as const;
+
+// Legacy static export kept for any remaining imports. Prefer categoriesQO.
+export const CATEGORIES = DEFAULT_CATEGORIES;
 
 export const PAYMENT_METHODS = [
   "Chase Debit",
