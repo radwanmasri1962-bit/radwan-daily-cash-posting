@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { money } from "@/lib/format";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+import { EditTransactionDialog, type EditableTx } from "@/components/EditTransactionDialog";
 
 export const Route = createFileRoute("/_authenticated/transactions")({
   component: TxLog,
@@ -23,6 +24,7 @@ function TxLog() {
   const { data: s } = useSuspenseQuery(settingsQO(user!.id));
   const qc = useQueryClient();
   const [q, setQ] = useState("");
+  const [editing, setEditing] = useState<EditableTx | null>(null);
 
   const filtered = txs.filter((t) => {
     if (!q) return true;
@@ -91,6 +93,14 @@ function TxLog() {
                 <Button
                   size="icon"
                   variant="ghost"
+                  onClick={() => setEditing(t as EditableTx)}
+                  aria-label="Edit"
+                >
+                  <Pencil className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
                   onClick={() => del(t.id, t.payment_method, Number(t.amount), t.adjust_account)}
                   aria-label="Delete"
                 >
@@ -101,6 +111,11 @@ function TxLog() {
           </ul>
         )}
       </Card>
+      <EditTransactionDialog
+        tx={editing}
+        open={editing !== null}
+        onOpenChange={(o) => !o && setEditing(null)}
+      />
     </div>
   );
 }
