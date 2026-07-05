@@ -204,8 +204,7 @@ function QuickBtn({
 }) {
   return (
     <Button asChild variant="outline" className="h-16 flex-col gap-1">
-      {/* @ts-expect-error dynamic search */}
-      <Link to={to} search={search}>
+      <Link to={to} search={search as never}>
         {icon}
         <span className="text-xs">{label}</span>
       </Link>
