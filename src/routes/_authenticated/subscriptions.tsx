@@ -34,8 +34,8 @@ interface Sub {
   pay_method: string;
   pay_day: number;
   status: string;
-  notes: string;
-  last_paid_ym: string;
+  notes: string | null;
+  last_paid_ym: string | null;
 }
 
 function Subs() {
