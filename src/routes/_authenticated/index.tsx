@@ -1,11 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { settingsQO, txQO, subsQO } from "@/lib/queries";
-import { money, daysUntil, ordinal, currentYM } from "@/lib/format";
-import { Plus, ArrowDownToLine, TrendingUp, Landmark, RefreshCw } from "lucide-react";
+import { money, ordinal } from "@/lib/format";
+import {
+  Plus,
+  ArrowDownToLine,
+  TrendingUp,
+  Landmark,
+  RefreshCw,
+  Wallet,
+  CreditCard,
+  Banknote,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
@@ -14,181 +27,234 @@ export const Route = createFileRoute("/_authenticated/")({
 function Dashboard() {
   const { user } = useAuth();
   const { data: s } = useSuspenseQuery(settingsQO(user!.id));
-  const { data: txs } = useSuspenseQuery(txQO(user!.id, 10));
+  const { data: txs } = useSuspenseQuery(txQO(user!.id, 8));
   const { data: subs } = useSuspenseQuery(subsQO(user!.id));
 
   const cap1Available = Number(s.cap1_limit) - Number(s.cap1_owed);
-  const utilization = s.cap1_limit > 0 ? (Number(s.cap1_owed) / Number(s.cap1_limit)) * 100 : 0;
-  const ym = currentYM();
-
-  const enrichedSubs = subs
-    .filter((x) => x.status !== "Paid")
-    .map((x) => {
-      const days = daysUntil(x.pay_day);
-      const paidThisMonth = x.last_paid_ym === ym;
-      let bucket: "overdue" | "today" | "soon" | "later" | "paid" = "later";
-      if (paidThisMonth) bucket = "paid";
-      else if (days < 0) bucket = "overdue";
-      else if (days === 0) bucket = "today";
-      else if (days <= 3) bucket = "soon";
-      return { ...x, days, bucket };
-    });
-
-  const upcoming = enrichedSubs.filter((s) => s.bucket === "soon");
-  const dueToday = enrichedSubs.filter((s) => s.bucket === "today");
-  const overdue = enrichedSubs.filter((s) => s.bucket === "overdue");
+  const utilization =
+    Number(s.cap1_limit) > 0 ? (Number(s.cap1_owed) / Number(s.cap1_limit)) * 100 : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Balance cards */}
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Accounts
-        </h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <BalanceCard label="Chase Checking" amount={s.chase_balance} tone="blue" big />
-          <BalanceCard label="Cash Wallet" amount={s.cash_balance} tone="green" big />
-          <BalanceCard label="Ohio SNAP" amount={s.snap_balance} tone="blue" big />
-          <BalanceCard label="Cap One Available" amount={cap1Available} tone="green" big />
-        </div>
+    <div className="mx-auto max-w-7xl space-y-8">
+      {/* Row 1: Account cards */}
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <AccountCard
+          label="Chase Checking"
+          balance={Number(s.chase_balance)}
+          icon={<Landmark className="h-5 w-5" />}
+        />
+        <Cap1Card
+          owed={Number(s.cap1_owed)}
+          available={cap1Available}
+          limit={Number(s.cap1_limit)}
+          utilization={utilization}
+          minPayment={Number(s.cap1_min_payment)}
+          dueDay={s.cap1_due_day}
+        />
+        <AccountCard
+          label="Cash Wallet"
+          balance={Number(s.cash_balance)}
+          icon={<Wallet className="h-5 w-5" />}
+        />
+        <AccountCard
+          label="Ohio SNAP"
+          balance={Number(s.snap_balance)}
+          icon={<ShieldCheck className="h-5 w-5" />}
+          footer={
+            <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+              <span>Next Deposit · {ordinal(s.snap_deposit_day)}</span>
+              <span className="font-medium text-emerald-500">
+                +{money(s.snap_deposit_amount)}
+              </span>
+            </div>
+          }
+        />
       </section>
 
-      {/* Capital One detail */}
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Capital One
-        </h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-          <BalanceCard label="Balance Owed" amount={s.cap1_owed} tone="red" />
-          <BalanceCard label="Credit Limit" amount={s.cap1_limit} tone="neutral" />
-          <BalanceCard
-            label="Utilization"
-            custom={`${utilization.toFixed(1)}%`}
-            tone={utilization > 30 ? "red" : utilization > 10 ? "yellow" : "green"}
-          />
-          <BalanceCard label="Min Payment" amount={s.cap1_min_payment} tone="yellow" />
-          <BalanceCard label="Due Date" custom={ordinal(s.cap1_due_day)} tone="neutral" />
-        </div>
+      {/* Quick Actions */}
+      <section className="grid grid-cols-2 gap-2 md:grid-cols-5">
+        <QuickBtn to="/add" icon={<Plus className="h-4 w-4" />} label="Add Expense" />
+        <QuickBtn
+          to="/add"
+          search={{ preset: "income" }}
+          icon={<TrendingUp className="h-4 w-4" />}
+          label="Add Income"
+        />
+        <QuickBtn
+          to="/add"
+          search={{ preset: "atm" }}
+          icon={<ArrowDownToLine className="h-4 w-4" />}
+          label="ATM Withdrawal"
+        />
+        <QuickBtn
+          to="/add"
+          search={{ preset: "payCap1" }}
+          icon={<CreditCard className="h-4 w-4" />}
+          label="Pay Capital One"
+        />
+        <QuickBtn to="/checkin" icon={<RefreshCw className="h-4 w-4" />} label="Daily Check-In" />
       </section>
 
-      {/* Quick actions */}
+      {/* Recent Transactions */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-          <QuickBtn to="/add" icon={<Plus className="h-4 w-4" />} label="Add Expense" />
-          <QuickBtn
-            to="/add"
-            search={{ preset: "income" }}
-            icon={<TrendingUp className="h-4 w-4" />}
-            label="Add Income"
-          />
-          <QuickBtn
-            to="/add"
-            search={{ preset: "atm" }}
-            icon={<ArrowDownToLine className="h-4 w-4" />}
-            label="ATM Withdrawal"
-          />
-          <QuickBtn
-            to="/add"
-            search={{ preset: "payCap1" }}
-            icon={<Landmark className="h-4 w-4" />}
-            label="Pay Cap One"
-          />
-          <QuickBtn to="/checkin" icon={<RefreshCw className="h-4 w-4" />} label="Daily Check-In" />
-        </div>
-      </section>
-
-      {/* Bills status */}
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Bills & Subscriptions
-        </h2>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <BillsBucket title="Overdue" items={overdue} tone="red" />
-          <BillsBucket title="Due Today" items={dueToday} tone="yellow" />
-          <BillsBucket title="Next 3 Days" items={upcoming} tone="blue" />
-        </div>
-      </section>
-
-      {/* Recent tx */}
-      <section>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Recent Transactions
           </h2>
-          <Link to="/transactions" className="text-sm text-primary hover:underline">
+          <Link to="/transactions" className="text-xs text-sky-400 hover:underline">
             View all
           </Link>
         </div>
-        <Card>
+        <Card className="overflow-hidden">
           {txs.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground">No transactions yet.</div>
+            <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+              <Banknote className="h-8 w-8 text-muted-foreground/60" />
+              <div className="text-sm font-medium">No transactions yet</div>
+              <div className="text-xs text-muted-foreground">
+                Start by adding your first transaction
+              </div>
+            </div>
           ) : (
-            <ul className="divide-y">
-              {txs.map((t) => (
-                <li key={t.id} className="flex items-center justify-between px-4 py-3">
-                  <div>
-                    <div className="font-medium">{t.description || t.category}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {t.tx_date} · {t.payment_method} · {t.category}
-                    </div>
-                  </div>
-                  <div
-                    className={`font-semibold ${
-                      t.payment_method === "Income to Chase"
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {money(t.amount)}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr className="border-b border-border/60">
+                    <th className="px-5 py-3 font-medium">Date</th>
+                    <th className="px-5 py-3 font-medium">Description</th>
+                    <th className="px-5 py-3 font-medium">Category</th>
+                    <th className="px-5 py-3 font-medium">Account</th>
+                    <th className="px-5 py-3 text-right font-medium">Amount</th>
+                    <th className="px-5 py-3 font-medium">Merchant</th>
+                    <th className="px-5 py-3 font-medium">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {txs.map((t) => {
+                    const isIncome = t.payment_method === "Income to Chase";
+                    return (
+                      <tr key={t.id} className="border-b border-border/40 last:border-0">
+                        <td className="px-5 py-4 text-muted-foreground">{t.tx_date}</td>
+                        <td className="px-5 py-4 font-medium">
+                          {t.description || t.category}
+                        </td>
+                        <td className="px-5 py-4 text-muted-foreground">{t.category}</td>
+                        <td className="px-5 py-4 text-muted-foreground">{t.payment_method}</td>
+                        <td
+                          className={`px-5 py-4 text-right font-semibold tabular-nums ${
+                            isIncome ? "text-emerald-500" : "text-foreground"
+                          }`}
+                        >
+                          {isIncome ? "+" : "−"}
+                          {money(t.amount)}
+                        </td>
+                        <td className="px-5 py-4 text-muted-foreground">{t.merchant ?? "—"}</td>
+                        <td className="px-5 py-4 text-muted-foreground">{t.notes ?? "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </Card>
       </section>
+
+      {/* Subscription Calendar */}
+      <SubscriptionCalendar
+        subs={subs.map((x) => ({
+          name: x.name,
+          amount: Number(x.amount),
+          pay_day: x.pay_day,
+        }))}
+        snap={{ day: s.snap_deposit_day, amount: Number(s.snap_deposit_amount) }}
+      />
     </div>
   );
 }
 
-function BalanceCard({
+/* ----------------- Cards ----------------- */
+
+function AccountCard({
   label,
-  amount,
-  custom,
-  tone,
-  big,
+  balance,
+  icon,
+  footer,
 }: {
   label: string;
-  amount?: number | string;
-  custom?: string;
-  tone: "blue" | "green" | "red" | "yellow" | "neutral";
-  big?: boolean;
+  balance: number;
+  icon: React.ReactNode;
+  footer?: React.ReactNode;
 }) {
-  const toneClass = {
-    blue: "border-blue-500/30 bg-blue-500/5",
-    green: "border-emerald-500/30 bg-emerald-500/5",
-    red: "border-rose-500/30 bg-rose-500/5",
-    yellow: "border-amber-500/30 bg-amber-500/5",
-    neutral: "",
-  }[tone];
-  const numClass = {
-    blue: "text-blue-600 dark:text-blue-400",
-    green: "text-emerald-600 dark:text-emerald-400",
-    red: "text-rose-600 dark:text-rose-400",
-    yellow: "text-amber-600 dark:text-amber-400",
-    neutral: "text-foreground",
-  }[tone];
   return (
-    <Card className={`p-4 ${toneClass}`}>
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className={`mt-1 font-bold tabular-nums ${numClass} ${big ? "text-2xl" : "text-lg"}`}>
-        {custom ?? money(amount)}
+    <Card className="p-5">
+      <div className="flex items-start justify-between">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </div>
+        <div className="text-muted-foreground">{icon}</div>
+      </div>
+      <div className="mt-6 text-xs text-muted-foreground">Current Balance</div>
+      <div className={`mt-1 text-3xl font-semibold tabular-nums ${amountColor(balance)}`}>
+        {money(balance)}
+      </div>
+      {footer}
+    </Card>
+  );
+}
+
+function Cap1Card({
+  owed,
+  available,
+  limit,
+  utilization,
+  minPayment,
+  dueDay,
+}: {
+  owed: number;
+  available: number;
+  limit: number;
+  utilization: number;
+  minPayment: number;
+  dueDay: number;
+}) {
+  return (
+    <Card className="p-5">
+      <div className="flex items-start justify-between">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Capital One
+        </div>
+        <CreditCard className="h-5 w-5 text-muted-foreground" />
+      </div>
+      <div className="mt-6 text-xs text-muted-foreground">Balance Owed</div>
+      <div className={`mt-1 text-3xl font-semibold tabular-nums ${amountColor(-owed)}`}>
+        {money(owed)}
+      </div>
+      <div className="mt-3 text-xs text-muted-foreground">Available Credit</div>
+      <div className="mt-0.5 text-sm font-medium tabular-nums">{money(available)}</div>
+
+      <div className="mt-4 grid grid-cols-4 gap-3 border-t border-border/60 pt-3 text-xs">
+        <Meta label="Limit" value={money(limit)} />
+        <Meta label="Utilization" value={`${utilization.toFixed(0)}%`} />
+        <Meta label="Min Pay" value={money(minPayment)} />
+        <Meta label="Due" value={ordinal(dueDay)} />
       </div>
     </Card>
   );
+}
+
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-0.5 font-medium tabular-nums">{value}</div>
+    </div>
+  );
+}
+
+function amountColor(n: number) {
+  if (n > 0) return "text-emerald-500";
+  if (n < 0) return "text-rose-500";
+  return "text-foreground";
 }
 
 function QuickBtn({
@@ -203,46 +269,156 @@ function QuickBtn({
   label: string;
 }) {
   return (
-    <Button asChild variant="outline" className="h-16 flex-col gap-1">
+    <Button asChild variant="outline" className="h-12 justify-center gap-2 border-border/60">
       <Link to={to} search={search as never}>
         {icon}
-        <span className="text-xs">{label}</span>
+        <span className="text-sm font-medium">{label}</span>
       </Link>
     </Button>
   );
 }
 
-function BillsBucket({
-  title,
-  items,
-  tone,
+/* ----------------- Subscription Calendar ----------------- */
+
+interface CalEvent {
+  name: string;
+  amount: number;
+  positive?: boolean;
+}
+
+function SubscriptionCalendar({
+  subs,
+  snap,
 }: {
-  title: string;
-  items: Array<{ id: string; name: string; amount: number; pay_day: number }>;
-  tone: "red" | "yellow" | "blue";
+  subs: Array<{ name: string; amount: number; pay_day: number }>;
+  snap: { day: number; amount: number };
 }) {
-  const toneClass = {
-    red: "border-rose-500/40",
-    yellow: "border-amber-500/40",
-    blue: "border-blue-500/40",
-  }[tone];
+  const today = new Date();
+  const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDow = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInPrev = new Date(year, month, 0).getDate();
+
+  const eventsByDay = new Map<number, CalEvent[]>();
+  for (const sub of subs) {
+    const day = Math.min(sub.pay_day, daysInMonth);
+    const list = eventsByDay.get(day) ?? [];
+    list.push({ name: sub.name, amount: sub.amount });
+    eventsByDay.set(day, list);
+  }
+  if (snap.day) {
+    const day = Math.min(snap.day, daysInMonth);
+    const list = eventsByDay.get(day) ?? [];
+    list.push({ name: "OHIO SNAP DEPOSIT", amount: snap.amount, positive: true });
+    eventsByDay.set(day, list);
+  }
+
+  const monthLabel = cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  // Build 6-week grid
+  const cells: Array<{ day: number; inMonth: boolean }> = [];
+  for (let i = firstDow - 1; i >= 0; i--) cells.push({ day: daysInPrev - i, inMonth: false });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, inMonth: true });
+  while (cells.length % 7 !== 0) cells.push({ day: cells.length - daysInMonth - firstDow + 1, inMonth: false });
+  while (cells.length < 42) {
+    cells.push({ day: cells.length - daysInMonth - firstDow + 1, inMonth: false });
+  }
+
+  const isCurrentMonth =
+    today.getFullYear() === year && today.getMonth() === month;
+
   return (
-    <Card className={`${toneClass}`}>
-      <div className="border-b px-4 py-2 text-sm font-semibold">{title}</div>
-      {items.length === 0 ? (
-        <div className="px-4 py-3 text-xs text-muted-foreground">None</div>
-      ) : (
-        <ul className="divide-y">
-          {items.map((s) => (
-            <li key={s.id} className="flex items-center justify-between px-4 py-2 text-sm">
-              <span>
-                {s.name} <span className="text-muted-foreground">· {ordinal(s.pay_day)}</span>
-              </span>
-              <span className="font-semibold tabular-nums">{money(s.amount)}</span>
-            </li>
+    <section>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Subscriptions Calendar
+        </h2>
+        <div className="flex items-center gap-2">
+          <div className="mr-2 text-sm font-medium">{monthLabel}</div>
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-7 w-7 border-border/60"
+            onClick={() => setCursor(new Date(year, month - 1, 1))}
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-7 w-7 border-border/60"
+            onClick={() => setCursor(new Date(year, month + 1, 1))}
+            aria-label="Next month"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 border-border/60"
+            onClick={() => setCursor(new Date(today.getFullYear(), today.getMonth(), 1))}
+          >
+            Today
+          </Button>
+        </div>
+      </div>
+
+      <Card className="overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-border/60 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+            <div key={d} className="py-3">
+              {d}
+            </div>
           ))}
-        </ul>
-      )}
-    </Card>
+        </div>
+        <div className="grid grid-cols-7">
+          {cells.map((cell, i) => {
+            const events = cell.inMonth ? eventsByDay.get(cell.day) ?? [] : [];
+            const isToday = cell.inMonth && isCurrentMonth && cell.day === today.getDate();
+            return (
+              <div
+                key={i}
+                className={`min-h-24 border-b border-r border-border/40 p-2 text-xs last:border-r-0 [&:nth-child(7n)]:border-r-0 ${
+                  cell.inMonth ? "" : "bg-muted/20 text-muted-foreground/50"
+                }`}
+              >
+                <div className="mb-1 flex items-center">
+                  <span
+                    className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] ${
+                      isToday
+                        ? "bg-sky-500 font-semibold text-white"
+                        : cell.inMonth
+                          ? "text-foreground"
+                          : ""
+                    }`}
+                  >
+                    {cell.day}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {events.map((e, idx) => (
+                    <div key={idx} className="leading-tight">
+                      <div className="truncate text-[11px] font-medium">{e.name}</div>
+                      <div
+                        className={`text-[11px] tabular-nums ${
+                          e.positive ? "text-emerald-500" : "text-muted-foreground"
+                        }`}
+                      >
+                        {e.positive ? "+" : ""}
+                        {money(e.amount)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+    </section>
   );
 }
