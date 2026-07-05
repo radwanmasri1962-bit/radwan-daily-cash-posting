@@ -30,7 +30,8 @@ function Reports() {
   const byCategory: Record<string, number> = {};
   monthTxs.forEach((t) => {
     if (["Chase Debit", "Capital One", "Cash", "SNAP"].includes(t.payment_method)) {
-      byCategory[t.category] = (byCategory[t.category] || 0) + Number(t.amount);
+      const cat = t.category ?? "Miscellaneous";
+      byCategory[cat] = (byCategory[cat] || 0) + Number(t.amount);
     }
   });
   const catRows = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
