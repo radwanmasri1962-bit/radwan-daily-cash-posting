@@ -1,15 +1,16 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { AppShell } from "@/components/AppShell";
 import { ensureSeeded } from "@/lib/seed";
+import { migrateLegacyAnonymousData } from "@/lib/account-migration.functions";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) throw redirect({ to: "/auth" });
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user || data.user.is_anonymous) throw redirect({ to: "/auth" });
   },
   component: LayoutComponent,
 });
@@ -24,15 +25,31 @@ function LayoutComponent() {
 
 function Gate() {
   const { user, loading } = useAuth();
+  const router = useRouter();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (loading || !user) return;
+    if (loading) return;
+    if (!user || user.is_anonymous) {
+      setReady(false);
+      void supabase.auth.signOut().finally(() => {
+        void router.navigate({ to: "/auth", replace: true });
+      });
+      return;
+    }
+
+    let active = true;
+    setReady(false);
     (async () => {
+      await migrateLegacyAnonymousData();
       await ensureSeeded(user.id);
-      setReady(true);
+      if (active) setReady(true);
     })();
-  }, [user, loading]);
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id, user?.is_anonymous, loading, router]);
 
   if (!ready) {
     return (

@@ -1,4 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ const NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   useEffect(() => setDark(isDark()), []);
 
@@ -42,6 +44,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
 
   async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
     await supabase.auth.signOut();
     router.navigate({ to: "/auth", replace: true });
   }
