@@ -14,7 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_snapshots: {
+        Row: {
+          cap1_available: number
+          cap1_owed: number
+          cash_balance: number
+          chase_balance: number
+          created_at: string
+          id: string
+          snap_balance: number
+          snapshot_date: string
+          user_id: string
+        }
+        Insert: {
+          cap1_available: number
+          cap1_owed: number
+          cash_balance: number
+          chase_balance: number
+          created_at?: string
+          id?: string
+          snap_balance: number
+          snapshot_date?: string
+          user_id: string
+        }
+        Update: {
+          cap1_available?: number
+          cap1_owed?: number
+          cash_balance?: number
+          chase_balance?: number
+          created_at?: string
+          id?: string
+          snap_balance?: number
+          snapshot_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          last_paid_ym: string | null
+          name: string
+          notes: string | null
+          pay_day: number
+          pay_method: string
+          sort_order: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          last_paid_ym?: string | null
+          name: string
+          notes?: string | null
+          pay_day?: number
+          pay_method?: string
+          sort_order?: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          last_paid_ym?: string | null
+          name?: string
+          notes?: string | null
+          pay_day?: number
+          pay_method?: string
+          sort_order?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          adjust_account: string | null
+          amount: number
+          category: string | null
+          created_at: string
+          description: string
+          id: string
+          merchant: string | null
+          notes: string | null
+          payment_method: string
+          tx_date: string
+          user_id: string
+        }
+        Insert: {
+          adjust_account?: string | null
+          amount: number
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          merchant?: string | null
+          notes?: string | null
+          payment_method: string
+          tx_date?: string
+          user_id: string
+        }
+        Update: {
+          adjust_account?: string | null
+          amount?: number
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          merchant?: string | null
+          notes?: string | null
+          payment_method?: string
+          tx_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          cap1_due_day: number
+          cap1_limit: number
+          cap1_min_payment: number
+          cap1_owed: number
+          cash_balance: number
+          chase_balance: number
+          created_at: string
+          seeded: boolean
+          snap_balance: number
+          snap_deposit_amount: number
+          snap_deposit_day: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cap1_due_day?: number
+          cap1_limit?: number
+          cap1_min_payment?: number
+          cap1_owed?: number
+          cash_balance?: number
+          chase_balance?: number
+          created_at?: string
+          seeded?: boolean
+          snap_balance?: number
+          snap_deposit_amount?: number
+          snap_deposit_day?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cap1_due_day?: number
+          cap1_limit?: number
+          cap1_min_payment?: number
+          cap1_owed?: number
+          cash_balance?: number
+          chase_balance?: number
+          created_at?: string
+          seeded?: boolean
+          snap_balance?: number
+          snap_deposit_amount?: number
+          snap_deposit_day?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
