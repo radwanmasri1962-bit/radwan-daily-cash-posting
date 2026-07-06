@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -196,7 +196,7 @@ function EditDialog({
 
   // Re-init on open
   const key = value?.id ?? (open ? "new" : "");
-  useMemo(() => {
+  useEffect(() => {
     setTitle(value?.title ?? "");
     setDate(value?.appointment_date ?? new Date().toISOString().slice(0, 10));
     setTime(value?.appointment_time ?? "");

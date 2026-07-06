@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -166,7 +166,7 @@ function EditDialog({
   const [saving, setSaving] = useState(false);
 
   const key = value?.id ?? (open ? "new" : "");
-  useMemo(() => {
+  useEffect(() => {
     setTitle(value?.title ?? "");
     setPriority(value?.priority ?? "normal");
     setDueDate(value?.due_date ?? "");
