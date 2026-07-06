@@ -14,8 +14,6 @@ import {
   Settings as SettingsIcon,
   Wallet,
   LogOut,
-  CalendarDays,
-  CheckSquare,
 } from "lucide-react";
 import { toggleTheme, isDark } from "@/lib/theme";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,13 +24,10 @@ const NAV = [
   { to: "/add", label: "Add Transaction", icon: PlusCircle },
   { to: "/checkin", label: "Daily Check-In", icon: CalendarCheck },
   { to: "/transactions", label: "Transactions", icon: ListOrdered },
-  { to: "/appointments", label: "Appointments", icon: CalendarDays },
-  { to: "/tasks", label: "Tasks", icon: CheckSquare },
   { to: "/subscriptions", label: "Subscriptions", icon: Repeat },
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
-
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(false);

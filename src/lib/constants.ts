@@ -2,24 +2,19 @@
 // After sign-up, categories are user-owned rows in the `categories` table
 // (add / rename / archive / favorite via Settings).
 export const DEFAULT_CATEGORIES = [
-  "Alcohol", "Amazon", "ATM Fee", "Bank Fees", "Beverages", "Breakfast", "Business", "Business Income",
-  "Cannabis", "Car Insurance", "Car Maintenance", "Car Payment", "Car Purchase", "Car Registration", "Car Wash",
+  "Alcohol", "Amazon", "Bank Fees", "Beverages", "Business", "Business Income",
+  "Cannabis", "Car Insurance", "Car Maintenance", "Car Payment", "Car Registration", "Car Wash",
   "Cash Deposit", "Cash Withdrawal", "Charity", "Child Expenses", "Cigarettes", "Cleaning Supplies",
-  "Clothing", "Coffee", "Credit Card Payment", "Debt Payment", "Dental", "Dining Out", "Dinner", "Doctor",
-  "Electricity", "Electronics", "Entertainment", "Family", "Family Support", "Fast Food", "Freelance", "Furniture",
+  "Clothing", "Coffee", "Credit Card Payment", "Debt Payment", "Dental", "Dining Out", "Doctor",
+  "Electricity", "Electronics", "Entertainment", "Family", "Fast Food", "Freelance", "Furniture",
   "Gas Utility", "Gasoline", "General Shopping", "Gift Received", "Gifts", "Gifts Given", "Groceries",
-  "Gym", "Haircut", "Health", "Home Maintenance", "Home Supplies", "Household Items", "Household Supplies",
-  "Insurance", "Interest Charges", "Interest Income",
-  "Internet", "JARA AI", "Laundry", "Loan Payment", "Lunch", "Lyft", "Marketing", "Miscellaneous",
-  "Office Equipment", "Office Supplies",
+  "Gym", "Health", "Household Items", "Household Supplies", "Interest Charges", "Interest Income",
+  "Internet", "JARA AI", "Laundry", "Loan Payment", "Marketing", "Miscellaneous", "Office Supplies",
   "Other Income", "Parking", "Personal Care", "Pharmacy", "Prescriptions", "Professional Services",
-  "Refund", "Rent", "Rent Processing Fee", "Restaurants", "Ride Share (Uber/Lyft)", "Salary",
-  "Security Deposit", "SNAP Food", "Snacks",
-  "Software & AI", "Streaming", "Subscriptions", "Taxes", "Tolls", "Transfer Between Accounts", "Travel",
-  "Uber", "Uber / Taxi", "Utilities", "Vape", "Vape / Tobacco", "Vitamins", "Vitamins & Supplements",
-  "Water", "Wire Transfer",
+  "Refund", "Rent", "Restaurants", "Ride Share (Uber/Lyft)", "Salary", "SNAP Food", "Snacks",
+  "Software & AI", "Streaming", "Subscriptions", "Tolls", "Transfer Between Accounts", "Travel",
+  "Uber / Taxi", "Utilities", "Vape / Tobacco", "Vitamins & Supplements", "Water",
 ] as const;
-
 
 // Legacy static export kept for any remaining imports. Prefer categoriesQO.
 export const CATEGORIES = DEFAULT_CATEGORIES;
