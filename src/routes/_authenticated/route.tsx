@@ -98,6 +98,22 @@ function Gate() {
         },
         () => void queryClient.invalidateQueries(),
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments", filter: `user_id=eq.${user.id}` },
+        () => void queryClient.invalidateQueries(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tasks", filter: `user_id=eq.${user.id}` },
+        () => void queryClient.invalidateQueries(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "daily_focus", filter: `user_id=eq.${user.id}` },
+        () => void queryClient.invalidateQueries(),
+      )
+
       .subscribe();
 
     return () => {
