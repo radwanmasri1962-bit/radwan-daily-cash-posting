@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
+import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authenticated/subscriptions'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
@@ -41,6 +42,11 @@ const AuthenticatedTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSubscriptionsRoute =
   AuthenticatedSubscriptionsRouteImport.update({
     id: '/subscriptions',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
+  '/tasks': typeof AuthenticatedTasksRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
 }
 export interface FileRoutesByTo {
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
+  '/tasks': typeof AuthenticatedTasksRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/': typeof AuthenticatedIndexRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/subscriptions': typeof AuthenticatedSubscriptionsRoute
+  '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/subscriptions'
+    | '/tasks'
     | '/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/subscriptions'
+    | '/tasks'
     | '/transactions'
     | '/'
   id:
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/subscriptions'
+    | '/_authenticated/tasks'
     | '/_authenticated/transactions'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
@@ -190,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof AuthenticatedTransactionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tasks': {
+      id: '/_authenticated/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AuthenticatedTasksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/subscriptions': {
@@ -252,6 +271,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSubscriptionsRoute: typeof AuthenticatedSubscriptionsRoute
+  AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -264,6 +284,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSubscriptionsRoute: AuthenticatedSubscriptionsRoute,
+  AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
