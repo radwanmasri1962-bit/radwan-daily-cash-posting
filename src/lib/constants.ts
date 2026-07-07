@@ -10,9 +10,10 @@ export const DEFAULT_CATEGORIES = [
   "Gas Utility", "Gasoline", "General Shopping", "Gift Received", "Gifts", "Gifts Given", "Groceries",
   "Gym", "Health", "Household Items", "Household Supplies", "Interest Charges", "Interest Income",
   "Internet", "JARA AI", "Laundry", "Loan Payment", "Marketing", "Miscellaneous", "Office Supplies",
-  "Other Income", "Parking", "Personal Care", "Pharmacy", "Prescriptions", "Professional Services",
-  "Refund", "Rent", "Restaurants", "Ride Share (Uber/Lyft)", "Salary", "SNAP Food", "Snacks",
-  "Software & AI", "Streaming", "Subscriptions", "Tolls", "Transfer Between Accounts", "Travel",
+  "Other Income", "Parking", "Parking Permit", "Personal Care", "Pharmacy", "Prescriptions",
+  "Professional Services", "Refund", "Rent", "Rent Deposit", "Rent Processing Fee", "Restaurants",
+  "Ride Share (Uber/Lyft)", "Salary", "SNAP Food", "Snacks", "Software & AI", "Streaming",
+  "Subscriptions", "T-Mobile", "Tolls", "Transfer Between Accounts", "Travel",
   "Uber / Taxi", "Utilities", "Vape / Tobacco", "Vitamins & Supplements", "Water",
 ] as const;
 
