@@ -17,6 +17,7 @@ import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authen
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedCheckinRouteImport } from './routes/_authenticated/checkin'
+import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
 import { Route as AuthenticatedAddRouteImport } from './routes/_authenticated/add'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated/accounts'
 
@@ -61,6 +62,11 @@ const AuthenticatedCheckinRoute = AuthenticatedCheckinRouteImport.update({
   path: '/checkin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBudgetRoute = AuthenticatedBudgetRouteImport.update({
+  id: '/budget',
+  path: '/budget',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAddRoute = AuthenticatedAddRouteImport.update({
   id: '/add',
   path: '/add',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/add': typeof AuthenticatedAddRoute
+  '/budget': typeof AuthenticatedBudgetRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/add': typeof AuthenticatedAddRoute
+  '/budget': typeof AuthenticatedBudgetRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/add': typeof AuthenticatedAddRoute
+  '/_authenticated/budget': typeof AuthenticatedBudgetRoute
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/accounts'
     | '/add'
+    | '/budget'
     | '/checkin'
     | '/reports'
     | '/settings'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/accounts'
     | '/add'
+    | '/budget'
     | '/checkin'
     | '/reports'
     | '/settings'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/accounts'
     | '/_authenticated/add'
+    | '/_authenticated/budget'
     | '/_authenticated/checkin'
     | '/_authenticated/reports'
     | '/_authenticated/settings'
@@ -207,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCheckinRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/budget': {
+      id: '/_authenticated/budget'
+      path: '/budget'
+      fullPath: '/budget'
+      preLoaderRoute: typeof AuthenticatedBudgetRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/add': {
       id: '/_authenticated/add'
       path: '/add'
@@ -227,6 +246,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedAddRoute: typeof AuthenticatedAddRoute
+  AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
   AuthenticatedCheckinRoute: typeof AuthenticatedCheckinRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -238,6 +258,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedAddRoute: AuthenticatedAddRoute,
+  AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
   AuthenticatedCheckinRoute: AuthenticatedCheckinRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
