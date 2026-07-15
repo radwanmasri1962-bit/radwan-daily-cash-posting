@@ -166,7 +166,7 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {txs.map((t) => {
+                    {recentTxs.map((t) => {
                       const kind = amountKind(t.payment_method);
                       const amtClass =
                         kind === "income"
