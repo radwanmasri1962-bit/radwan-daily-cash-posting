@@ -43,10 +43,43 @@ export const DEFAULT_SUBSCRIPTIONS = [
   { name: "Lovable", amount: 25, pay_method: "Chase", pay_day: 11, status: "Active" },
   { name: "Spotify Standard", amount: 14, pay_method: "Chase", pay_day: 26, status: "Active" },
   { name: "Microsoft 365", amount: 10, pay_method: "Chase", pay_day: 2, status: "Active" },
-  { name: "Fubo TV", amount: 45, pay_method: "Chase", pay_day: 10, status: "Active" },
+  { name: "Fubo TV", amount: 45, pay_method: "Chase", pay_day: 10, status: "canceled" },
   { name: "T-Mobile", amount: 97, pay_method: "Chase", pay_day: 9, status: "Active" },
   { name: "Canva Pro", amount: 13, pay_method: "Capital One", pay_day: 16, status: "Cancel / Watch" },
   { name: "iCloud", amount: 3, pay_method: "Chase", pay_day: 29, status: "Active" },
+];
+
+export const CATEGORY_GROUPS = [
+  "Housing",
+  "Utilities",
+  "Transportation",
+  "Food",
+  "Insurance",
+  "Health",
+  "Subscriptions",
+  "Personal",
+  "Business",
+  "Debt",
+  "Savings",
+  "Other",
+] as const;
+export type CategoryGroup = (typeof CATEGORY_GROUPS)[number];
+
+// Preloaded monthly expenses seeded for new accounts.
+export const DEFAULT_MONTHLY_EXPENSES = [
+  { name: "Rent", category_group: "Housing", category: "Rent", due_day: 1, is_fixed: true, payment_account: "Chase Checking" },
+  { name: "Renters Insurance", category_group: "Insurance", category: "Renters Insurance", due_day: 1, is_fixed: true, payment_account: "Chase Checking" },
+  { name: "Office Space", category_group: "Business", category: "Office Space", due_day: 1, is_fixed: true, payment_account: "Chase Checking" },
+  { name: "Parking Permit", category_group: "Transportation", category: "Parking Permit", due_day: 1, is_fixed: true, payment_account: "Chase Checking" },
+  { name: "Car Insurance", category_group: "Insurance", category: "Car Insurance", due_day: 1, is_fixed: true, payment_account: "Chase Checking" },
+  { name: "Gasoline", category_group: "Transportation", category: "Gasoline", due_day: 1, is_fixed: false, payment_account: "Chase Checking" },
+  { name: "Groceries", category_group: "Food", category: "Groceries", due_day: 1, is_fixed: false, payment_account: "Chase Checking" },
+];
+
+// Preloaded emergency funds seeded for new accounts.
+export const DEFAULT_EMERGENCY_FUNDS = [
+  { name: "Emergency Car Repair", target_amount: 1000, planned_monthly_contribution: 50, linked_account: "Chase Checking" },
+  { name: "Rent Buffer", target_amount: 2000, planned_monthly_contribution: 100, linked_account: "Chase Checking" },
 ];
 
 export const DEFAULT_SETTINGS = {
