@@ -53,6 +53,45 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_lines: {
+        Row: {
+          category: string
+          category_group: string
+          created_at: string
+          id: string
+          is_archived: boolean
+          notes: string | null
+          planned_amount: number
+          updated_at: string
+          user_id: string
+          ym: string
+        }
+        Insert: {
+          category: string
+          category_group?: string
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          notes?: string | null
+          planned_amount?: number
+          updated_at?: string
+          user_id: string
+          ym: string
+        }
+        Update: {
+          category?: string
+          category_group?: string
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          notes?: string | null
+          planned_amount?: number
+          updated_at?: string
+          user_id?: string
+          ym?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -140,10 +179,232 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_fund_activity: {
+        Row: {
+          activity_date: string
+          amount: number
+          created_at: string
+          fund_id: string
+          id: string
+          kind: string
+          notes: string | null
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_date?: string
+          amount: number
+          created_at?: string
+          fund_id: string
+          id?: string
+          kind: string
+          notes?: string | null
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_date?: string
+          amount?: number
+          created_at?: string
+          fund_id?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_fund_activity_fund_id_fkey"
+            columns: ["fund_id"]
+            isOneToOne: false
+            referencedRelation: "emergency_funds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_fund_activity_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emergency_funds: {
+        Row: {
+          created_at: string
+          id: string
+          is_archived: boolean
+          linked_account: string | null
+          name: string
+          notes: string | null
+          planned_monthly_contribution: number
+          reserved_amount: number
+          target_amount: number
+          target_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          linked_account?: string | null
+          name: string
+          notes?: string | null
+          planned_monthly_contribution?: number
+          reserved_amount?: number
+          target_amount?: number
+          target_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          linked_account?: string | null
+          name?: string
+          notes?: string | null
+          planned_monthly_contribution?: number
+          reserved_amount?: number
+          target_amount?: number
+          target_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      monthly_expense_payments: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          id: string
+          monthly_expense_id: string
+          notes: string | null
+          paid_date: string | null
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          ym: string
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          id?: string
+          monthly_expense_id: string
+          notes?: string | null
+          paid_date?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          ym: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          id?: string
+          monthly_expense_id?: string
+          notes?: string | null
+          paid_date?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          ym?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_expense_payments_monthly_expense_id_fkey"
+            columns: ["monthly_expense_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monthly_expense_payments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monthly_expenses: {
+        Row: {
+          autopay: boolean
+          category: string
+          category_group: string
+          created_at: string
+          due_day: number
+          end_date: string | null
+          expected_amount: number
+          frequency: string
+          id: string
+          is_active: boolean
+          is_fixed: boolean
+          linked_subscription_id: string | null
+          name: string
+          notes: string | null
+          payment_account: string
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          autopay?: boolean
+          category: string
+          category_group?: string
+          created_at?: string
+          due_day?: number
+          end_date?: string | null
+          expected_amount?: number
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          is_fixed?: boolean
+          linked_subscription_id?: string | null
+          name: string
+          notes?: string | null
+          payment_account?: string
+          start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          autopay?: boolean
+          category?: string
+          category_group?: string
+          created_at?: string
+          due_day?: number
+          end_date?: string | null
+          expected_amount?: number
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          is_fixed?: boolean
+          linked_subscription_id?: string | null
+          name?: string
+          notes?: string | null
+          payment_account?: string
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_expenses_linked_subscription_id_fkey"
+            columns: ["linked_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number
           created_at: string
+          end_date: string | null
           id: string
           last_paid_ym: string | null
           name: string
@@ -152,11 +413,13 @@ export type Database = {
           pay_method: string
           sort_order: number
           status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
           amount?: number
           created_at?: string
+          end_date?: string | null
           id?: string
           last_paid_ym?: string | null
           name: string
@@ -165,11 +428,13 @@ export type Database = {
           pay_method?: string
           sort_order?: number
           status?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
           created_at?: string
+          end_date?: string | null
           id?: string
           last_paid_ym?: string | null
           name?: string
@@ -178,6 +443,7 @@ export type Database = {
           pay_method?: string
           sort_order?: number
           status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -222,11 +488,15 @@ export type Database = {
         Row: {
           adjust_account: string | null
           amount: number
+          budget_ym: string | null
           category: string | null
           created_at: string
           description: string
+          emergency_fund_id: string | null
+          fund_amount: number | null
           id: string
           merchant: string | null
+          monthly_expense_id: string | null
           notes: string | null
           payment_method: string
           tx_date: string
@@ -235,11 +505,15 @@ export type Database = {
         Insert: {
           adjust_account?: string | null
           amount: number
+          budget_ym?: string | null
           category?: string | null
           created_at?: string
           description?: string
+          emergency_fund_id?: string | null
+          fund_amount?: number | null
           id?: string
           merchant?: string | null
+          monthly_expense_id?: string | null
           notes?: string | null
           payment_method: string
           tx_date?: string
@@ -248,11 +522,15 @@ export type Database = {
         Update: {
           adjust_account?: string | null
           amount?: number
+          budget_ym?: string | null
           category?: string | null
           created_at?: string
           description?: string
+          emergency_fund_id?: string | null
+          fund_amount?: number | null
           id?: string
           merchant?: string | null
+          monthly_expense_id?: string | null
           notes?: string | null
           payment_method?: string
           tx_date?: string
