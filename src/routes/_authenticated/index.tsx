@@ -336,6 +336,41 @@ function Cap1Card({
   );
 }
 
+function SummaryCard({
+  title,
+  to,
+  primary,
+  primaryLabel,
+  secondary,
+  progress,
+  tone,
+}: {
+  title: string;
+  to: string;
+  primary: string;
+  primaryLabel: string;
+  secondary: string;
+  progress: number;
+  tone: "good" | "bad";
+}) {
+  return (
+    <Link to={to} className="block">
+      <Card className="p-5 transition-colors hover:bg-muted/30">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
+          <span className="text-[10px] text-sky-400">View →</span>
+        </div>
+        <div className="mt-4 text-xs text-muted-foreground">{primaryLabel}</div>
+        <div className={`mt-1 text-2xl font-semibold tabular-nums ${tone === "bad" ? "text-rose-500" : "text-emerald-500"}`}>
+          {primary}
+        </div>
+        <Progress value={progress} className="mt-3" />
+        <div className="mt-2 text-xs text-muted-foreground">{secondary}</div>
+      </Card>
+    </Link>
+  );
+}
+
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
