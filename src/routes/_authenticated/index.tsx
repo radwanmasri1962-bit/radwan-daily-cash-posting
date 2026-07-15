@@ -35,14 +35,33 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function Dashboard() {
   const { user } = useAuth();
+  const ym = currentYm();
   const { data: s } = useSuspenseQuery(settingsQO(user!.id));
-  const { data: txs } = useSuspenseQuery(txQO(user!.id, 8));
+  const { data: txs } = useSuspenseQuery(txQO(user!.id, 100));
   const { data: subs } = useSuspenseQuery(subsQO(user!.id));
+  const { data: monthlyExpenses } = useSuspenseQuery(monthlyExpensesQO(user!.id));
+  const { data: expensePayments } = useSuspenseQuery(monthlyExpensePaymentsQO(user!.id, ym));
+  const { data: funds } = useSuspenseQuery(emergencyFundsQO(user!.id));
+  const { data: budgetLines } = useSuspenseQuery(budgetLinesQO(user!.id, ym));
   const [selected, setSelected] = useState<EditableTx | null>(null);
 
   const cap1Available = Number(s.cap1_limit) - Number(s.cap1_owed);
   const utilization =
     Number(s.cap1_limit) > 0 ? (Number(s.cap1_owed) / Number(s.cap1_limit)) * 100 : 0;
+
+  const monthActualSpend = useMemo(
+    () => txs
+      .filter((t) => t.tx_date.startsWith(ym) && amountKind(t.payment_method) === "expense")
+      .reduce((s, t) => s + Number(t.amount), 0),
+    [txs, ym],
+  );
+  const plannedTotal = budgetLines.reduce((s, l) => s + Number(l.planned_amount), 0);
+  const expectedTotal = monthlyExpenses.filter((e) => e.is_active).reduce((s, e) => s + Number(e.expected_amount), 0);
+  const paidTotal = expensePayments.reduce((s, p) => s + Number(p.amount_paid), 0);
+  const fundsReserved = funds.reduce((s, f) => s + Number(f.reserved_amount), 0);
+  const fundsTarget = funds.reduce((s, f) => s + Number(f.target_amount), 0);
+
+  const recentTxs = txs.slice(0, 8);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
