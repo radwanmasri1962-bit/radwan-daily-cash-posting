@@ -14,6 +14,9 @@ import {
   Settings as SettingsIcon,
   Wallet,
   LogOut,
+  Target,
+  Receipt,
+  PiggyBank,
 } from "lucide-react";
 import { toggleTheme, isDark } from "@/lib/theme";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +27,9 @@ const NAV = [
   { to: "/add", label: "Add Transaction", icon: PlusCircle },
   { to: "/checkin", label: "Daily Check-In", icon: CalendarCheck },
   { to: "/transactions", label: "Transactions", icon: ListOrdered },
+  { to: "/budget", label: "Monthly Budget", icon: Target },
+  { to: "/expenses", label: "Monthly Expenses", icon: Receipt },
+  { to: "/funds", label: "Emergency Funds", icon: PiggyBank },
   { to: "/subscriptions", label: "Subscriptions", icon: Repeat },
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
