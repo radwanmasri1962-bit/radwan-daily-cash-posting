@@ -1,5 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
-import { DEFAULT_SETTINGS, DEFAULT_SUBSCRIPTIONS, DEFAULT_CATEGORIES } from "./constants";
+import {
+  DEFAULT_SETTINGS,
+  DEFAULT_SUBSCRIPTIONS,
+  DEFAULT_CATEGORIES,
+  DEFAULT_MONTHLY_EXPENSES,
+  DEFAULT_EMERGENCY_FUNDS,
+} from "./constants";
 
 export async function ensureSeeded(userId: string) {
   const { data: existing } = await supabase
@@ -10,6 +16,8 @@ export async function ensureSeeded(userId: string) {
 
   if (existing?.seeded) {
     await ensureCategoriesSeeded(userId);
+    await ensureMonthlyExpensesSeeded(userId);
+    await ensureEmergencyFundsSeeded(userId);
     return existing;
   }
 
@@ -28,6 +36,8 @@ export async function ensureSeeded(userId: string) {
   }
 
   await ensureCategoriesSeeded(userId);
+  await ensureMonthlyExpensesSeeded(userId);
+  await ensureEmergencyFundsSeeded(userId);
 
   const { data } = await supabase
     .from("user_settings")
@@ -47,6 +57,34 @@ async function ensureCategoriesSeeded(userId: string) {
     .from("categories")
     .upsert(
       DEFAULT_CATEGORIES.map((name) => ({ user_id: userId, name })),
+      { onConflict: "user_id,name", ignoreDuplicates: true },
+    );
+}
+
+async function ensureMonthlyExpensesSeeded(userId: string) {
+  const { count } = await supabase
+    .from("monthly_expenses")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+  if ((count ?? 0) > 0) return;
+  await supabase
+    .from("monthly_expenses")
+    .upsert(
+      DEFAULT_MONTHLY_EXPENSES.map((m) => ({ ...m, user_id: userId })),
+      { onConflict: "user_id,name", ignoreDuplicates: true },
+    );
+}
+
+async function ensureEmergencyFundsSeeded(userId: string) {
+  const { count } = await supabase
+    .from("emergency_funds")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+  if ((count ?? 0) > 0) return;
+  await supabase
+    .from("emergency_funds")
+    .upsert(
+      DEFAULT_EMERGENCY_FUNDS.map((f) => ({ ...f, user_id: userId })),
       { onConflict: "user_id,name", ignoreDuplicates: true },
     );
 }

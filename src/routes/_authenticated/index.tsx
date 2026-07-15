@@ -1,11 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/auth-context";
-import { settingsQO, txQO, subsQO } from "@/lib/queries";
+import {
+  settingsQO, txQO, subsQO,
+  monthlyExpensesQO, monthlyExpensePaymentsQO,
+  emergencyFundsQO, budgetLinesQO, currentYm,
+} from "@/lib/queries";
 import { money, ordinal } from "@/lib/format";
 import { amountKind } from "@/lib/tx-kind";
 import { TransactionDetailsDialog } from "@/components/TransactionDetailsDialog";
@@ -30,14 +35,33 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function Dashboard() {
   const { user } = useAuth();
+  const ym = currentYm();
   const { data: s } = useSuspenseQuery(settingsQO(user!.id));
-  const { data: txs } = useSuspenseQuery(txQO(user!.id, 8));
+  const { data: txs } = useSuspenseQuery(txQO(user!.id, 100));
   const { data: subs } = useSuspenseQuery(subsQO(user!.id));
+  const { data: monthlyExpenses } = useSuspenseQuery(monthlyExpensesQO(user!.id));
+  const { data: expensePayments } = useSuspenseQuery(monthlyExpensePaymentsQO(user!.id, ym));
+  const { data: funds } = useSuspenseQuery(emergencyFundsQO(user!.id));
+  const { data: budgetLines } = useSuspenseQuery(budgetLinesQO(user!.id, ym));
   const [selected, setSelected] = useState<EditableTx | null>(null);
 
   const cap1Available = Number(s.cap1_limit) - Number(s.cap1_owed);
   const utilization =
     Number(s.cap1_limit) > 0 ? (Number(s.cap1_owed) / Number(s.cap1_limit)) * 100 : 0;
+
+  const monthActualSpend = useMemo(
+    () => txs
+      .filter((t) => t.tx_date.startsWith(ym) && amountKind(t.payment_method) === "expense")
+      .reduce((s, t) => s + Number(t.amount), 0),
+    [txs, ym],
+  );
+  const plannedTotal = budgetLines.reduce((s, l) => s + Number(l.planned_amount), 0);
+  const expectedTotal = monthlyExpenses.filter((e) => e.is_active).reduce((s, e) => s + Number(e.expected_amount), 0);
+  const paidTotal = expensePayments.reduce((s, p) => s + Number(p.amount_paid), 0);
+  const fundsReserved = funds.reduce((s, f) => s + Number(f.reserved_amount), 0);
+  const fundsTarget = funds.reduce((s, f) => s + Number(f.target_amount), 0);
+
+  const recentTxs = txs.slice(0, 8);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
@@ -100,6 +124,38 @@ function Dashboard() {
         <QuickBtn to="/checkin" icon={<RefreshCw className="h-4 w-4" />} label="Daily Check-In" />
       </section>
 
+      {/* Budget / Expenses / Funds summary */}
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <SummaryCard
+          title="Monthly Budget"
+          to="/budget"
+          primary={money(monthActualSpend)}
+          primaryLabel={`Spent · ${ym}`}
+          secondary={plannedTotal > 0 ? `${money(plannedTotal - monthActualSpend)} left of ${money(plannedTotal)}` : "No plan set"}
+          progress={plannedTotal > 0 ? Math.min(100, (monthActualSpend / plannedTotal) * 100) : 0}
+          tone={plannedTotal > 0 && monthActualSpend > plannedTotal ? "bad" : "good"}
+        />
+        <SummaryCard
+          title="Monthly Expenses"
+          to="/expenses"
+          primary={money(paidTotal)}
+          primaryLabel={`Paid · ${ym}`}
+          secondary={expectedTotal > 0 ? `${money(Math.max(0, expectedTotal - paidTotal))} outstanding of ${money(expectedTotal)}` : "No expenses tracked"}
+          progress={expectedTotal > 0 ? Math.min(100, (paidTotal / expectedTotal) * 100) : 0}
+          tone={paidTotal >= expectedTotal ? "good" : "bad"}
+        />
+        <SummaryCard
+          title="Emergency Funds"
+          to="/funds"
+          primary={money(fundsReserved)}
+          primaryLabel="Reserved"
+          secondary={fundsTarget > 0 ? `Target ${money(fundsTarget)}` : "No target set"}
+          progress={fundsTarget > 0 ? Math.min(100, (fundsReserved / fundsTarget) * 100) : 0}
+          tone="good"
+        />
+      </section>
+
+
       {/* Recent Transactions */}
       <section>
         <div className="mb-4 flex items-center justify-between">
@@ -111,7 +167,7 @@ function Dashboard() {
           </Link>
         </div>
         <Card className="overflow-hidden">
-          {txs.length === 0 ? (
+          {recentTxs.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
               <Banknote className="h-8 w-8 text-muted-foreground/60" />
               <div className="text-sm font-medium">No transactions yet</div>
@@ -142,7 +198,7 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {txs.map((t) => {
+                    {recentTxs.map((t) => {
                       const kind = amountKind(t.payment_method);
                       const amtClass =
                         kind === "income"
@@ -197,11 +253,13 @@ function Dashboard() {
 
       {/* Subscription Calendar */}
       <SubscriptionCalendar
-        subs={subs.map((x) => ({
-          name: x.name,
-          amount: Number(x.amount),
-          pay_day: x.pay_day,
-        }))}
+        subs={subs
+          .filter((x) => x.status !== "canceled")
+          .map((x) => ({
+            name: x.name,
+            amount: Number(x.amount),
+            pay_day: x.pay_day,
+          }))}
         snap={{ day: s.snap_deposit_day, amount: Number(s.snap_deposit_amount) }}
       />
     </div>
@@ -275,6 +333,41 @@ function Cap1Card({
         <Meta label="Due" value={ordinal(dueDay)} />
       </div>
     </Card>
+  );
+}
+
+function SummaryCard({
+  title,
+  to,
+  primary,
+  primaryLabel,
+  secondary,
+  progress,
+  tone,
+}: {
+  title: string;
+  to: string;
+  primary: string;
+  primaryLabel: string;
+  secondary: string;
+  progress: number;
+  tone: "good" | "bad";
+}) {
+  return (
+    <Link to={to} className="block">
+      <Card className="p-5 transition-colors hover:bg-muted/30">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
+          <span className="text-[10px] text-sky-400">View →</span>
+        </div>
+        <div className="mt-4 text-xs text-muted-foreground">{primaryLabel}</div>
+        <div className={`mt-1 text-2xl font-semibold tabular-nums ${tone === "bad" ? "text-rose-500" : "text-emerald-500"}`}>
+          {primary}
+        </div>
+        <Progress value={progress} className="mt-3" />
+        <div className="mt-2 text-xs text-muted-foreground">{secondary}</div>
+      </Card>
+    </Link>
   );
 }
 
