@@ -197,11 +197,13 @@ function Dashboard() {
 
       {/* Subscription Calendar */}
       <SubscriptionCalendar
-        subs={subs.map((x) => ({
-          name: x.name,
-          amount: Number(x.amount),
-          pay_day: x.pay_day,
-        }))}
+        subs={subs
+          .filter((x) => x.status !== "canceled")
+          .map((x) => ({
+            name: x.name,
+            amount: Number(x.amount),
+            pay_day: x.pay_day,
+          }))}
         snap={{ day: s.snap_deposit_day, amount: Number(s.snap_deposit_amount) }}
       />
     </div>
