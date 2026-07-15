@@ -124,6 +124,38 @@ function Dashboard() {
         <QuickBtn to="/checkin" icon={<RefreshCw className="h-4 w-4" />} label="Daily Check-In" />
       </section>
 
+      {/* Budget / Expenses / Funds summary */}
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <SummaryCard
+          title="Monthly Budget"
+          to="/budget"
+          primary={money(monthActualSpend)}
+          primaryLabel={`Spent · ${ym}`}
+          secondary={plannedTotal > 0 ? `${money(plannedTotal - monthActualSpend)} left of ${money(plannedTotal)}` : "No plan set"}
+          progress={plannedTotal > 0 ? Math.min(100, (monthActualSpend / plannedTotal) * 100) : 0}
+          tone={plannedTotal > 0 && monthActualSpend > plannedTotal ? "bad" : "good"}
+        />
+        <SummaryCard
+          title="Monthly Expenses"
+          to="/expenses"
+          primary={money(paidTotal)}
+          primaryLabel={`Paid · ${ym}`}
+          secondary={expectedTotal > 0 ? `${money(Math.max(0, expectedTotal - paidTotal))} outstanding of ${money(expectedTotal)}` : "No expenses tracked"}
+          progress={expectedTotal > 0 ? Math.min(100, (paidTotal / expectedTotal) * 100) : 0}
+          tone={paidTotal >= expectedTotal ? "good" : "bad"}
+        />
+        <SummaryCard
+          title="Emergency Funds"
+          to="/funds"
+          primary={money(fundsReserved)}
+          primaryLabel="Reserved"
+          secondary={fundsTarget > 0 ? `Target ${money(fundsTarget)}` : "No target set"}
+          progress={fundsTarget > 0 ? Math.min(100, (fundsReserved / fundsTarget) * 100) : 0}
+          tone="good"
+        />
+      </section>
+
+
       {/* Recent Transactions */}
       <section>
         <div className="mb-4 flex items-center justify-between">
