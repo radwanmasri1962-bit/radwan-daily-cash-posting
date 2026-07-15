@@ -1,11 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/auth-context";
-import { settingsQO, txQO, subsQO } from "@/lib/queries";
+import {
+  settingsQO, txQO, subsQO,
+  monthlyExpensesQO, monthlyExpensePaymentsQO,
+  emergencyFundsQO, budgetLinesQO, currentYm,
+} from "@/lib/queries";
 import { money, ordinal } from "@/lib/format";
 import { amountKind } from "@/lib/tx-kind";
 import { TransactionDetailsDialog } from "@/components/TransactionDetailsDialog";
