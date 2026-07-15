@@ -135,7 +135,7 @@ function Dashboard() {
           </Link>
         </div>
         <Card className="overflow-hidden">
-          {txs.length === 0 ? (
+          {recentTxs.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
               <Banknote className="h-8 w-8 text-muted-foreground/60" />
               <div className="text-sm font-medium">No transactions yet</div>
