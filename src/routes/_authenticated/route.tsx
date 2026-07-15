@@ -98,6 +98,11 @@ function Gate() {
         },
         () => void queryClient.invalidateQueries(),
       )
+      .on("postgres_changes", { event: "*", schema: "public", table: "budget_lines", filter: `user_id=eq.${user.id}` }, () => void queryClient.invalidateQueries())
+      .on("postgres_changes", { event: "*", schema: "public", table: "monthly_expenses", filter: `user_id=eq.${user.id}` }, () => void queryClient.invalidateQueries())
+      .on("postgres_changes", { event: "*", schema: "public", table: "monthly_expense_payments", filter: `user_id=eq.${user.id}` }, () => void queryClient.invalidateQueries())
+      .on("postgres_changes", { event: "*", schema: "public", table: "emergency_funds", filter: `user_id=eq.${user.id}` }, () => void queryClient.invalidateQueries())
+      .on("postgres_changes", { event: "*", schema: "public", table: "emergency_fund_activity", filter: `user_id=eq.${user.id}` }, () => void queryClient.invalidateQueries())
       .subscribe();
 
     return () => {
