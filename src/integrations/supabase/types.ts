@@ -94,6 +94,7 @@ export type Database = {
       }
       categories: {
         Row: {
+          category_group: string
           created_at: string
           id: string
           is_archived: boolean
@@ -103,6 +104,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category_group?: string
           created_at?: string
           id?: string
           is_archived?: boolean
@@ -112,6 +114,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category_group?: string
           created_at?: string
           id?: string
           is_archived?: boolean
@@ -271,6 +274,48 @@ export type Database = {
           target_amount?: number
           target_date?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      merchant_memory: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          last_used_at: string
+          merchant_key: string
+          merchant_name: string
+          payment_method: string | null
+          updated_at: string
+          use_count: number
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_used_at?: string
+          merchant_key: string
+          merchant_name: string
+          payment_method?: string | null
+          updated_at?: string
+          use_count?: number
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_used_at?: string
+          merchant_key?: string
+          merchant_name?: string
+          payment_method?: string | null
+          updated_at?: string
+          use_count?: number
           user_id?: string
         }
         Relationships: []
