@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, Star } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { categoriesQO } from "@/lib/queries";
+import { categoriesQO, type CategoryRow } from "@/lib/queries";
+import { GROUP_ORDER, groupOf } from "@/lib/category-system";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,14 +27,30 @@ export function CategoryPicker({ value, onChange }: Props) {
   const { data: cats } = useSuspenseQuery(categoriesQO(user!.id));
   const [open, setOpen] = useState(false);
 
-  const { favorites, others } = useMemo(() => {
+  const { favorites, groups, legacySelected } = useMemo(() => {
     const active = cats.filter((c) => !c.is_archived);
-    active.sort((a, b) => a.name.localeCompare(b.name));
-    return {
-      favorites: active.filter((c) => c.is_favorite),
-      others: active.filter((c) => !c.is_favorite),
-    };
-  }, [cats]);
+    const favorites = active
+      .filter((c) => c.is_favorite)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const map = new Map<string, CategoryRow[]>();
+    for (const c of active) {
+      const g = groupOf(c.name, c.category_group);
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(c);
+    }
+    const ordered = [...map.entries()].sort((a, b) => {
+      const ia = GROUP_ORDER.indexOf(a[0] as never);
+      const ib = GROUP_ORDER.indexOf(b[0] as never);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+    for (const [, list] of ordered) list.sort((a, b) => a.name.localeCompare(b.name));
+
+    const legacySelected =
+      value && !active.some((c) => c.name === value) ? value : null;
+
+    return { favorites, groups: ordered, legacySelected };
+  }, [cats, value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,14 +69,26 @@ export function CategoryPicker({ value, onChange }: Props) {
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
           <CommandInput placeholder="Search category…" />
-          <CommandList className="max-h-72">
+          <CommandList className="max-h-80">
             <CommandEmpty>No category found.</CommandEmpty>
+            {legacySelected && (
+              <>
+                <CommandGroup heading="Current (archived)">
+                  <Row
+                    name={legacySelected}
+                    selected
+                    onSelect={() => setOpen(false)}
+                  />
+                </CommandGroup>
+                <CommandSeparator />
+              </>
+            )}
             {favorites.length > 0 && (
               <>
                 <CommandGroup heading="Favorites">
                   {favorites.map((c) => (
                     <Row
-                      key={c.id}
+                      key={`fav-${c.id}`}
                       name={c.name}
                       favorite
                       selected={value === c.name}
@@ -73,19 +102,22 @@ export function CategoryPicker({ value, onChange }: Props) {
                 <CommandSeparator />
               </>
             )}
-            <CommandGroup heading="All categories">
-              {others.map((c) => (
-                <Row
-                  key={c.id}
-                  name={c.name}
-                  selected={value === c.name}
-                  onSelect={() => {
-                    onChange(c.name);
-                    setOpen(false);
-                  }}
-                />
-              ))}
-            </CommandGroup>
+            {groups.map(([group, list]) => (
+              <CommandGroup key={group} heading={group.toUpperCase()}>
+                {list.map((c) => (
+                  <Row
+                    key={c.id}
+                    name={c.name}
+                    favorite={c.is_favorite}
+                    selected={value === c.name}
+                    onSelect={() => {
+                      onChange(c.name);
+                      setOpen(false);
+                    }}
+                  />
+                ))}
+              </CommandGroup>
+            ))}
           </CommandList>
         </Command>
       </PopoverContent>
