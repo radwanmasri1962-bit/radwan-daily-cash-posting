@@ -1,24 +1,13 @@
-// Default seed list used only when creating a new account.
+import { ACTIVE_CATEGORIES } from "./category-system";
+
+// Default seed list used only when creating a new account (V2 streamlined set).
 // After sign-up, categories are user-owned rows in the `categories` table
 // (add / rename / archive / favorite via Settings).
-export const DEFAULT_CATEGORIES = [
-  "Alcohol", "Amazon", "Bank Fees", "Beverages", "Business", "Business Income",
-  "Cannabis", "Car Insurance", "Car Maintenance", "Car Payment", "Car Registration", "Car Wash",
-  "Cash Deposit", "Cash Withdrawal", "Charity", "Child Expenses", "Cigarettes", "Cleaning Supplies",
-  "Clothing", "Coffee", "Credit Card Payment", "Debt Payment", "Dental", "Dining Out", "Doctor",
-  "Electricity", "Electronics", "Entertainment", "Family", "Fast Food", "Freelance", "Furniture",
-  "Gas Utility", "Gasoline", "General Shopping", "Gift Received", "Gifts", "Gifts Given", "Groceries",
-  "Gym", "Health", "Household Items", "Household Supplies", "Interest Charges", "Interest Income",
-  "Internet", "JARA AI", "Laundry", "Loan Payment", "Marketing", "Miscellaneous", "Office Supplies",
-  "Other Income", "Parking", "Parking Permit", "Personal Care", "Pharmacy", "Prescriptions",
-  "Professional Services", "Refund", "Rent", "Rent Deposit", "Rent Processing Fee", "Restaurants",
-  "Ride Share (Uber/Lyft)", "Salary", "SNAP Food", "Snacks", "Software & AI", "Streaming",
-  "Subscriptions", "T-Mobile", "Tolls", "Transfer Between Accounts", "Travel",
-  "Uber / Taxi", "Utilities", "Vape / Tobacco", "Vitamins & Supplements", "Water",
-] as const;
+export const DEFAULT_CATEGORIES = ACTIVE_CATEGORIES;
 
 // Legacy static export kept for any remaining imports. Prefer categoriesQO.
-export const CATEGORIES = DEFAULT_CATEGORIES;
+export const CATEGORIES = ACTIVE_CATEGORIES.map((c) => c.name);
+
 
 export const PAYMENT_METHODS = [
   "Chase Debit",
