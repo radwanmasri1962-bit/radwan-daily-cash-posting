@@ -4,10 +4,16 @@ import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Send, RefreshCw, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Sparkles, Send, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { money } from "@/lib/format";
 import { askAssistant, runCashProjection } from "@/lib/assistant.functions";
-import type { AnswerBlock, AssistantAnswer, ProjectionResult } from "@/lib/assistant/types";
+import type {
+  AnswerBlock,
+  AssistantAnswer,
+  HistoryItem,
+  ProjectionResult,
+} from "@/lib/assistant/types";
 
 export const Route = createFileRoute("/_authenticated/assistant")({
   component: AssistantPage,
@@ -31,18 +37,23 @@ export const Route = createFileRoute("/_authenticated/assistant")({
 });
 
 const STARTERS = [
-  "How much have I spent on cigarettes this year?",
-  "Compare groceries for the last six months.",
-  "How much have I spent on Zaki Project?",
-  "What subscriptions are due before September 15?",
-  "Show every Amazon purchase over $50.",
-  "How much have I spent eating out versus groceries?",
-  "Which category is increasing the fastest?",
-  "Project my Chase balance for the next 30 days.",
+  "How much did I spend on cigarettes this year?",
+  "Compare groceries for the last six months",
+  "What bills are due in the next 7 days?",
+  "What will my Chase balance be after this month's bills?",
+  "What if I spend $100 on groceries?",
+  "Show my top spending categories this month",
 ];
 
 const DISCLAIMER =
-  "Informational only. Projections are estimates based on the data recorded in this app.";
+  "Informational only. Projections and what-if scenarios are estimates based on the data recorded in this app and are never saved.";
+
+type ChatItem =
+  | { id: number; role: "user"; text: string }
+  | { id: number; role: "assistant"; answer: AssistantAnswer }
+  | { id: number; role: "error"; text: string; retry: string };
+
+let nextId = 1;
 
 function AssistantPage() {
   const ask = useServerFn(askAssistant);
@@ -50,10 +61,11 @@ function AssistantPage() {
 
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<AssistantAnswer[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [messages, setMessages] = useState<ChatItem[]>([]);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
+  const [showProjection, setShowProjection] = useState(false);
   const [horizon, setHorizon] = useState(30);
   const [targetDate, setTargetDate] = useState("");
   const [projection, setProjection] = useState<ProjectionResult | null>(null);
@@ -64,17 +76,41 @@ function AssistantPage() {
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, loading]);
+
+  function buildHistory(list: ChatItem[]): HistoryItem[] {
+    return list
+      .filter((m): m is Extract<ChatItem, { role: "assistant" }> => m.role === "assistant")
+      .slice(-3)
+      .map((m) => ({
+        question: m.answer.question,
+        headline: m.answer.headline,
+        rangeLabel: m.answer.rangeLabel,
+      }));
+  }
+
   async function submit(q: string) {
     const text = q.trim();
     if (!text || loading) return;
     setLoading(true);
-    setError(null);
+    setQuestion("");
+    setMessages((prev) => [...prev, { id: nextId++, role: "user", text }]);
     try {
-      const res = await ask({ data: { question: text } });
-      setAnswers((prev) => [res, ...prev]);
-      setQuestion("");
+      const history = buildHistory(messages);
+      const res = await ask({ data: { question: text, history } });
+      setMessages((prev) => [...prev, { id: nextId++, role: "assistant", answer: res }]);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong. Please retry.");
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId++,
+          role: "error",
+          text: e instanceof Error ? e.message : "Something went wrong. Please retry.",
+          retry: text,
+        },
+      ]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
@@ -97,134 +133,180 @@ function AssistantPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">AI Financial Assistant</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ask about spending, balances, bills, and what your cash may look like next.
+          Ask about spending, bills, balances, what-if scenarios, and projected cash — answered
+          from your own recorded data, read-only.
         </p>
       </div>
 
-      <Card className="p-5">
-        <form
-          className="flex flex-col gap-2 sm:flex-row"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submit(question);
-          }}
-        >
-          <Input
-            ref={inputRef}
-            value={question}
-            maxLength={400}
-            placeholder="e.g. How much did I spend on groceries last month?"
-            onChange={(e) => setQuestion(e.target.value)}
-            disabled={loading}
-          />
-          <Button type="submit" disabled={loading || !question.trim()} className="sm:w-32">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            <span className="ml-2">{loading ? "Thinking" : "Send"}</span>
-          </Button>
-        </form>
+      <Card className="flex min-h-[55vh] flex-col overflow-hidden p-0">
+        {/* Conversation */}
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <Sparkles className="h-6 w-6 text-muted-foreground" />
+              <p className="text-sm font-medium">What would you like to know?</p>
+              <p className="max-w-md text-xs text-muted-foreground">
+                I analyze the transactions, bills, subscriptions, budgets and balances already
+                recorded in this app. I never change anything, and what-if scenarios are never
+                saved. If no matching data exists, I&apos;ll say so.
+              </p>
+              <div className="mt-2 flex max-w-xl flex-wrap justify-center gap-2">
+                {STARTERS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => void submit(s)}
+                    disabled={loading}
+                    className="rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {STARTERS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => void submit(s)}
-              disabled={loading}
-              className="rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
-            >
-              {s}
-            </button>
-          ))}
+          {messages.map((m) => {
+            if (m.role === "user") {
+              return (
+                <div key={m.id} className="flex justify-end">
+                  <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-sm text-primary-foreground">
+                    {m.text}
+                  </div>
+                </div>
+              );
+            }
+            if (m.role === "error") {
+              return (
+                <div key={m.id} className="flex justify-start">
+                  <div className="flex max-w-[95%] flex-col gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <span>{m.text}</span>
+                    <Button size="sm" variant="outline" onClick={() => void submit(m.retry)} disabled={loading}>
+                      <RefreshCw className="mr-2 h-3.5 w-3.5" /> Retry
+                    </Button>
+                  </div>
+                </div>
+              );
+            }
+            return <AnswerCard key={m.id} answer={m.answer} onFollowUp={(q) => void submit(q)} />;
+          })}
+
+          {loading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Analyzing your data…
+            </div>
+          ) : null}
+          <div ref={bottomRef} />
         </div>
 
-        {error ? (
-          <div className="mt-4 flex flex-col gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <span>{error}</span>
-            <Button size="sm" variant="outline" onClick={() => void submit(question || answers[0]?.question || "")}>
-              <RefreshCw className="mr-2 h-3.5 w-3.5" /> Retry
+        {/* Composer */}
+        <div className="border-t border-border/60 p-3 sm:p-4">
+          <form
+            className="flex items-end gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void submit(question);
+            }}
+          >
+            <Textarea
+              ref={inputRef}
+              value={question}
+              maxLength={500}
+              rows={1}
+              placeholder="e.g. How much did I spend on groceries last month?"
+              className="max-h-32 min-h-[42px] flex-1 resize-none"
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void submit(question);
+                }
+              }}
+              disabled={loading}
+            />
+            <Button type="submit" disabled={loading || !question.trim()} size="icon" className="h-[42px] w-[42px] shrink-0">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              <span className="sr-only">Send</span>
             </Button>
-          </div>
-        ) : null}
-
-        <p className="mt-4 text-[11px] text-muted-foreground">{DISCLAIMER}</p>
+          </form>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Enter to send · Shift+Enter for a new line. {DISCLAIMER}
+          </p>
+        </div>
       </Card>
 
-      {/* Cash Projection */}
+      {/* Cash Projection tool */}
       <Card className="p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between text-left"
+          onClick={() => setShowProjection((v) => !v)}
+        >
           <div>
-            <h2 className="text-lg font-semibold">Cash Projection</h2>
+            <h2 className="text-lg font-semibold">Cash Projection tool</h2>
             <p className="text-xs text-muted-foreground">
               Conservative estimate from your saved balances plus known scheduled obligations.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {[7, 14, 30].map((d) => (
-              <Button
-                key={d}
-                size="sm"
-                variant={horizon === d && !targetDate ? "default" : "outline"}
-                onClick={() => {
-                  setHorizon(d);
-                  setTargetDate("");
-                  void loadProjection(d);
-                }}
-              >
-                {d} days
-              </Button>
-            ))}
-            <Input
-              type="date"
-              value={targetDate}
-              className="h-9 w-[150px]"
-              onChange={(e) => {
-                setTargetDate(e.target.value);
-                if (e.target.value) void loadProjection(horizon, e.target.value);
-              }}
-            />
-          </div>
-        </div>
+          {showProjection ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          )}
+        </button>
 
-        {projLoading ? (
-          <p className="mt-4 text-sm text-muted-foreground">Building projection…</p>
-        ) : projError ? (
-          <div className="mt-4 flex items-center justify-between rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
-            <span>{projError}</span>
-            <Button size="sm" variant="outline" onClick={() => void loadProjection(horizon, targetDate)}>
-              Retry
-            </Button>
-          </div>
-        ) : projection ? (
+        {showProjection ? (
           <div className="mt-4 space-y-4">
-            <ProjectionView p={projection} />
+            <div className="flex flex-wrap items-center gap-2">
+              {[7, 14, 30].map((d) => (
+                <Button
+                  key={d}
+                  size="sm"
+                  variant={horizon === d && !targetDate ? "default" : "outline"}
+                  onClick={() => {
+                    setHorizon(d);
+                    setTargetDate("");
+                    void loadProjection(d);
+                  }}
+                >
+                  {d} days
+                </Button>
+              ))}
+              <Input
+                type="date"
+                value={targetDate}
+                className="h-9 w-[150px]"
+                onChange={(e) => {
+                  setTargetDate(e.target.value);
+                  if (e.target.value) void loadProjection(horizon, e.target.value);
+                }}
+              />
+            </div>
+
+            {projLoading ? (
+              <p className="text-sm text-muted-foreground">Building projection…</p>
+            ) : projError ? (
+              <div className="flex items-center justify-between rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+                <span>{projError}</span>
+                <Button size="sm" variant="outline" onClick={() => void loadProjection(horizon, targetDate)}>
+                  Retry
+                </Button>
+              </div>
+            ) : projection ? (
+              <ProjectionView p={projection} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Pick a horizon to see a dated timeline and projected closing balances.
+              </p>
+            )}
           </div>
-        ) : (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Pick a horizon to see a dated timeline and projected closing balances.
-          </p>
-        )}
+        ) : null}
       </Card>
-
-      {/* Answers */}
-      {answers.length === 0 && !loading ? (
-        <Card className="flex flex-col items-center gap-2 p-10 text-center">
-          <Sparkles className="h-6 w-6 text-muted-foreground" />
-          <p className="text-sm font-medium">No questions yet</p>
-          <p className="max-w-md text-xs text-muted-foreground">
-            Ask anything about your recorded transactions, budgets, subscriptions, monthly expenses,
-            emergency funds or balances. Answers are calculated from your own data — the assistant
-            never changes anything.
-          </p>
-        </Card>
-      ) : null}
-
-      {answers.map((a, i) => (
-        <AnswerCard key={`${a.question}-${i}`} answer={a} onFollowUp={(q) => void submit(q)} />
-      ))}
     </div>
   );
 }
@@ -237,20 +319,15 @@ function AnswerCard({
   onFollowUp: (q: string) => void;
 }) {
   return (
-    <Card className="space-y-4 p-5">
+    <Card className="space-y-4 border-border/60 p-4 sm:p-5">
       <div>
-        <div className="text-xs text-muted-foreground">You asked</div>
-        <div className="text-sm font-medium">{answer.question}</div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold">{answer.headline}</h3>
+        <h3 className="text-base font-semibold sm:text-lg">{answer.headline}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{answer.narrative}</p>
       </div>
 
       {answer.status === "ok" ? (
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-          <span>Date range: {answer.rangeLabel}</span>
+          {answer.rangeLabel ? <span>Date range: {answer.rangeLabel}</span> : null}
           <span>Based on: {answer.basedOn}</span>
         </div>
       ) : null}

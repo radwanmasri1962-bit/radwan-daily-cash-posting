@@ -11,10 +11,13 @@ export const INTENT_KINDS = [
   "top_merchants",
   "cash_flow",
   "upcoming",
+  "overdue",
   "balances",
   "budget_vs_actual",
   "emergency_funds",
   "projection",
+  "what_if",
+  "affordability",
   "clarify",
   "unsupported",
 ] as const;
@@ -37,7 +40,20 @@ export interface AssistantIntent {
   maxAmount: number | null;
   months: number | null;
   horizonDays: number | null;
+  /** Hypothetical dollar amount for what_if / affordability. Never persisted. */
+  amount: number | null;
+  /** One of the app's payment methods for what_if / affordability scenarios. */
+  whatIfMethod: string | null;
+  /** Account name for Manual Adjustment style scenarios. */
+  whatIfAccount: string | null;
   clarifyQuestion: string | null;
+}
+
+/** Lightweight prior-turn context so follow-up questions resolve naturally. */
+export interface HistoryItem {
+  question: string;
+  headline: string;
+  rangeLabel: string;
 }
 
 export interface TxRow {
