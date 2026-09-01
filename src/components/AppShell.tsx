@@ -17,6 +17,7 @@ import {
   Target,
   Receipt,
   PiggyBank,
+  Sparkles,
 } from "lucide-react";
 import { toggleTheme, isDark } from "@/lib/theme";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +32,7 @@ const NAV = [
   { to: "/expenses", label: "Monthly Expenses", icon: Receipt },
   { to: "/funds", label: "Emergency Funds", icon: PiggyBank },
   { to: "/subscriptions", label: "Subscriptions", icon: Repeat },
+  { to: "/assistant", label: "AI Assistant", icon: Sparkles },
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
