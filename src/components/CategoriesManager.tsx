@@ -3,6 +3,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { categoriesQO, type CategoryRow } from "@/lib/queries";
+import { GROUP_ORDER, groupOf } from "@/lib/category-system";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,20 @@ export function CategoriesManager() {
   const sorted = [...cats].sort((a, b) => a.name.localeCompare(b.name));
   const active = sorted.filter((c) => !c.is_archived);
   const archived = sorted.filter((c) => c.is_archived);
+
+  const activeGroups = (() => {
+    const map = new Map<string, CategoryRow[]>();
+    for (const c of active) {
+      const g = groupOf(c.name, c.category_group);
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(c);
+    }
+    return [...map.entries()].sort((a, b) => {
+      const ia = GROUP_ORDER.indexOf(a[0] as never);
+      const ib = GROUP_ORDER.indexOf(b[0] as never);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+  })();
 
   async function refresh() {
     await qc.invalidateQueries({ queryKey: ["categories", user!.id] });
@@ -182,8 +197,17 @@ export function CategoriesManager() {
         Star to favorite (favorites appear at the top when adding a transaction). Rename cascades to
         existing transactions. Archive hides a category without deleting its history.
       </p>
-      <div className="rounded-md border">
-        <ul className="divide-y">{active.map(renderRow)}</ul>
+      <div className="space-y-3">
+        {activeGroups.map(([group, list]) => (
+          <div key={group}>
+            <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {group}
+            </div>
+            <div className="rounded-md border">
+              <ul className="divide-y">{list.map(renderRow)}</ul>
+            </div>
+          </div>
+        ))}
       </div>
       {showArchived && archived.length > 0 && (
         <div className="mt-4">
