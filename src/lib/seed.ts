@@ -56,7 +56,11 @@ async function ensureCategoriesSeeded(userId: string) {
   await supabase
     .from("categories")
     .upsert(
-      DEFAULT_CATEGORIES.map((name) => ({ user_id: userId, name })),
+      DEFAULT_CATEGORIES.map((c) => ({
+        user_id: userId,
+        name: c.name,
+        category_group: c.group,
+      })),
       { onConflict: "user_id,name", ignoreDuplicates: true },
     );
 }

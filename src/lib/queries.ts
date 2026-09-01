@@ -64,11 +64,39 @@ export interface CategoryRow {
   id: string;
   user_id: string;
   name: string;
+  category_group: string;
   is_favorite: boolean;
   is_archived: boolean;
   created_at: string;
   updated_at: string;
 }
+
+export interface MerchantMemoryRow {
+  id: string;
+  user_id: string;
+  merchant_key: string;
+  merchant_name: string;
+  category: string | null;
+  description: string | null;
+  payment_method: string | null;
+  use_count: number;
+  last_used_at: string;
+}
+
+export const merchantMemoryQO = (userId: string) =>
+  queryOptions({
+    queryKey: ["merchant_memory", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("merchant_memory")
+        .select("*")
+        .eq("user_id", userId)
+        .order("use_count", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as MerchantMemoryRow[];
+    },
+  });
+
 
 export const categoriesQO = (userId: string) =>
   queryOptions({
